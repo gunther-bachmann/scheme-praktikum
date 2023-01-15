@@ -1,0 +1,1027 @@
+#+OPTIONS: toc:nil
+#+LANGUAGE: de
+#+LaTeX_CLASS: report
+#+LATEX_HEADER: \usepackage[T1]{fontenc}
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage[german]{babel}
+* additional :noexport:
+- for additional material look here https://www.bootstrapworld.org/materials/fall2022/en-us/courses/algebra-wescheme/
+* Linx und die Shell
+** Einführung und Begriffe
+*** Wie kommuniziere ich mit dem Computer?
+    In dieser Sitzung lernst du, wie du dem Computer einfache Kommandos geben kannst. Dazu benötigst du heute
+    1. Einen Computer - hier: den Raspberry PI
+    2. Ein Betriebssystem - hier: Linux
+    3. Die Shell - hier: Bash
+*** Was ist Linux?
+    Computer, die keinen Strom haben, vergessen alles. Daher haben sie /Festplatten/ auf denen Sie sich
+    alles merken, was sie nach dem Einschalten wieder wissen sollen.
+
+    Linux ist ein /Betriebssystem/, dass dem Computer nach dem Einschalten wieder erklärt, wie der Computer
+    mit uns Menschen und anderen Maschinen kommunizieren kann. Das ist ungeheuer wichtig, da Computer
+    ansonsten für uns Menschen gar nicht bedienbar wären!
+    - Betriebssystem (operating system) :: ist eine Ansammlung von Programmen für deinen Computer, die die Nutzung erst möglich macht. Darin
+      enthalten sind Anweisungen, um Informationen auf dem Bildschirm auszugeben, um Dateien abzulegen und wieder zu lesen und vieles mehr.
+*** Was ist eine Shell?
+    Die Shell ist dein direkter Draht zum Computer. Hier kannst du direkt mit ihm sprechen.
+    Der Computer versteht allerdings nicht unsere Sprache. Wir müssen seine lernen.
+
+    Du wirst sehen, mit einigen wenigen Kommandos kann der Computer bereits einiges für dich erledigen.
+    - Kommandozeile (command line shell) :: erlaubt es, textbasierte Kommandos an das Betriebssystem zu schicken.
+*** Öffnen und Schließen einer Shell
+    Auf dem Raspi kannst du die Shell über das Programm Menü öffnen.
+** Kommandos
+   Jetzt kommen wir endlich zum praktischen Teil, den konkreten Kommandos für deinen Computer. Mit den folgenden Kommandos kannst du _nichts_
+   kaputt machen. Du kannst sie also gefahrlos ausprobieren. Probier bitte soviel aus, wie dir sinnvoll erscheint.
+
+   - WICHTIG :: Die Eingabe von Kommandos wird mit der ~Enter~ Taste beendet (auf manchen Tastaturen auch mit ~Return~ oder ~Eingabe~ gekennzeichnet).
+*** List, Change Directory, Concatenate und Exit
+**** ls (list)
+
+     Mit diesem Kommando kannst du dir im aktuellen /Verzeichnis/ Dateien und weitere Verzeichnisse auflisten lassen.
+     #+begin_src sh
+       # Eingabe in die Shell
+       ls
+     #+end_src
+     *Probier es direkt mal selber aus.* Was bekommst du angezeigt?
+
+     Der Computer listet dir alle Dateien auf, die sich in deinem aktuellen Verzeichnis befinden. Du befindest dich aktuell an einer
+     bestimmten Stelle (dazu später noch mehr). Außerdem bekommst du weitere, sogenannte Unterverzeichnisse aufgelistet. Dazu später mehr.
+
+     Kannst du am Namen der Dateien erkennen, was wohl darin verborgen ist?
+
+     Wir schauen uns später an, wie wir den Inhalt der Dateien zu sehen bekommen. Zunächst soll es uns
+     hier reichen, die Liste der Dateien einmal auszugeben.
+     - Datei (file) :: ist der Ort, an dem du wichtige Informationen abspeicherst und für spätere Sitzungen behälst.
+     - Dateiname (filename) :: wird verwendet um Dateien wieder zu finden und wieder zu erkennen.
+     - Dateiendung (extension) :: sind dazu da, die Form deiner Datei zu beschreiben. Die Dateiendung gibt dir außerdem Tipps, welches
+       Programm du nutzen kannst, um deine Datei anzusehen oder zu bearbeiten.
+     - Verzeichnis (directory / folder) :: ist der Ort, an dem du deine Datei ablegst und auch wieder findest. Es ist quasi eine Schublade
+       für deine Dateien.
+**** cd (change directory)
+
+     Mit diesem Kommando wechselst du deine Position im Baum der Verzeichnisse, um andere Stellen in deinem Computer zu sehen.
+     #+begin_src sh
+       # Eingabe in die Shell
+       cd Dokumente
+     #+end_src
+     *Probier es aus!* Mit diesem Kommando wechselst du in das Verzeichnis ~Dokumente~. Findet der Computer dieses Verzeichnis nicht schreibt er
+     eine Fehlermeldung.
+     #+begin_src text
+       cd: Dokumente: No such file or directory
+     #+end_src
+     Mit ~ls~ kannst du dich immer wieder versichern, was es so alles gibt.
+
+     Es gibt natürlich noch viele weitere Verzeichnisse auf deinem Computer. Kennst du ein paar?
+     
+     - Baum (tree) :: Computer organisieren deine Dateien als Baum. Wenn du eine Datei ablegst, dann genau an einer Stelle dieses
+       Baums. Diese Stelle solltest du dir merken, um deine Datei auch wieder zu finden.
+     Bei einem Baum kannst du auf verschiedene Äste (Verzeichnisse) klettern und auch wieder zurück. Bei deinem Computer kommst du mit
+     folgendem Kommando wieder einen Schritt zurück:
+     #+begin_src sh
+       # Eingabe in die Shell
+       cd ..
+     #+end_src
+     Hier kannst du dir mit ~ls~ wieder einen Überblick verschaffen, welche Dateien an dieser Stelle des Baums abgelegt sind.
+     - TIPP :: Mit dem Kommando ~pwd~ (print working directory) kannst du dir vom Computer sagen lassen, wo du gerade im Baum bist. Probier es doch einfach mal aus
+       und gib es in der Shell ein. Jeder Ast in deinem Baum wird durch ein ~'/'~ von dem anderen getrennt. D.h. ~/home/annemike/Dokumente~
+       bedeutet, dass du, von der Wurzel deines Baums ausgehend auf den Ast ~home~, bei der nächsten Abzweigung auf den Ast ~annemike~ und bei
+       der letzten Abzweigung auf den Ast ~Dokumente~ gewechselt hast.
+
+     *Versuche nun mal auf Erkundungstour zu gehen!* Welche Verzeichnisse hat dein Computer so? Versuche fünf unterschiedliche Verzeichnisse
+     auf deinem Computer zu erkunden und schreibe die ersten drei Dateien pro Verzeichnis auf.
+
+     Tatsächlich kann man in diesem Wust von Verzeichnissen leicht die Orientierung verlieren. Es gibt ein Befehl, der dich wieder zurück
+     bringt, egal wie sehr du dich verirrt hast:
+     #+begin_src sh
+       # Eingabe in die Shell
+       cd ~
+     #+end_src
+     Mit diesem Befehl kommst du immer nach /Hause/ (home).
+**** cat (concatenate)
+
+     Mit diesem Kommando kannst du dir einfach Inhalte von Dateien ausgeben lassen. In deinem Verzeichnis sind bestimmt ein paar Dateien, die
+     auf ~'.txt'~ enden. Diese /Dateiendung/ wird benutzt für einfache Textdateien.
+     #+begin_src sh
+       # Eingabe in die Shell
+       cat MeinText.txt
+     #+end_src
+     *Probier es aus!* Was bekommst du angezeigt?
+     
+     Es gibt auch viele Dateien auf deinem Computer, die keine Textdateien sind. Wenn du diese mit ~cat~ auflisten willst, bekommst du in der
+     Regel komische Zeichen auf dem Monitor zu sehen.
+
+     Woran liegt das?
+
+     Der Computer arbeitet eigentlich nur mit Zahlen (organisiert in Bytes). Wenn ich dem Computer sage, dass ich Text erwarte, versucht er
+     mir auch Text auszugeben. Er wandelt dann Zahlen in Text um.
+
+     Wie geht das?
+
+     Jeder Buchstabe bekommt eine Zahl. Trifft der Computer auf diese Zahl, gibt er den entsprechenden Buchstaben aus.
+     Der Buchstabe ~A~ ist z.B. mit der Zahl 65 kodiert. Trifft der Computer nun auf eine 65 gibt er bei ~cat~ ein ~A~ aus. Eine komplette Datei
+     besteht aus einer Liste von Zahlen (Bytes). Jedes Byte wird dann zu einem Buchstabe /umgewandelt/ und ausgegeben.
+     - Dateiendung (extension) :: beschreibt die Form, in der Informationen in einer Datei abgelegt sind (z.b. ~txt~ für eine einfache Textdatei).
+     - Byte :: ist eine Zahleneinheit, die bei Computer überlicherweise Verwendung finden. In einem Byte kann eine Computer 256 verschiedene
+       Zahlen speichern.
+     - Liste :: werden genutzt, um Dinge aneinander zu reihen (z.B. Buchstaben, Dateien, Zahlen etc). Bei der Arbeit mit dem Computer wirst
+       du es immer wieder mit Listen von Dingen zu tun haben.
+**** exit (exit)
+
+     Hast du nun genug von deiner Shell, kannst du ihr mit ~exit~ befehlen, sich zu beenden. Das schließt dann auch das Fenster. Probier es
+     einfach mal aus.
+*** Programme starten
+    Von der Shell aus lassen sich auch direkt Programme starten. Diese Programme sind auch über das Programm Menü erreichbar.
+    - Parameter :: dienen dazu, den Befehlen noch Details mitzugeben. Ein sehr übliches Parameter ist ~help~, mit dem man Hilfe zu einem Befehl
+      abfragen kann.
+**** libreoffice
+          
+     *Probier mal in der Shell folgenden Befehl!*
+     #+begin_src sh
+       # Eingabe in die Shell
+       libreoffice --help
+     #+end_src
+     Du bekommst eine sehr ausführliche List von Informationen, wie der Befehl ~libreoffice~ genutzt werden kann. Das ist wirklich nur zum
+     Nachschlagen gedacht. Keiner merkt sich alle dieser Parameter! Viele Programm funktionieren auch komplett ohne zusätzliche
+     Parameter. *Probier das aus!* Nutze mal nur den Befehl ~libreoffice~. Was passiert?
+
+     Libreoffice ist ein Programm mit dem du Text Dokumente schreiben kannst. Dabei kannst du den Text formatieren und bekommst eine Ansicht,
+     die ausgedruckt sehr ähnlich der Anzeige ist. Aber das kennst du vielleicht ja auch schon.
+
+     Du kannst das Programm nun beenden.
+**** drracket
+     
+     Dieses Programm kennst du bestimmt noch nicht. Es dauert auch ein bisschen, bis es vollständig geladen ist. Nicht ungeduldig werden.
+     #+begin_src sh
+       # Eingabe in die Shell
+       drracket
+     #+end_src
+     Auch dieses Programm kannst du wieder schließen. Wir werden später, beim Programmieren deines Computers noch öfter dieses Programm gebrauchen.
+**** git
+     
+     Dieses Program ist nun etwas spezieller. Nur echte ProgrammiererInnen nutzen dieses Program. Daher ist es auch nicht so leicht zu
+     verstehen.
+     #+begin_src sh
+       # Eingabe in die Shell
+       git --help
+     #+end_src
+     Auch dieses Programm werden wir später noch häufiger nutzen. Aber keine Angst. Wenn es soweit ist, werden wir die Befehle genau
+     durchgehen und du kannst jeder Zeit wieder nachschauen, wie dieses Programm zu nutzen ist.
+
+     Dieses Programm unterscheidet sich von denen davor, weil es die Shell nicht verlässt. Es öffnet kein Fenster, wo man etwas /anclicken/
+     kann. Es bleibt komplett in der Shell. Es ist ein sogenanntes Kommando Zeilen Programm.
+
+     Das war es jetzt aber erstmal.
+** Finde den Schatz!
+   Nun gilt es einen Schatz zu finden. Dabei kannst du einiges anwenden, was du gelernt hast. Du kannst natürlich auch immer wieder
+   zurückblättern, zu den Stellen, wo das Navigieren im Verzeichnisbaum beschrieben ist!
+
+   @@latex:\bigskip\noindent@@
+   In einer Datei auf deinem Computer wurde ein Schatz versteckt. *Versuche diesen zu finden.* Benutze hierzu die Kommandos ~ls~, ~cd~, und ~cat~ in
+   einer /Shell/.
+
+   @@latex:\bigskip\noindent@@
+   Wenn du den Schatz gefunden hast, beschreibe was du gefunden hast und wo du diesen Schatz gefunden hast (also wo im Verzeichnisbaum deines
+   Computers).
+
+   @@latex:\bigskip\noindent@@
+   Natürlich kannst du um Hilfe bitten, falls du nicht weiter kommst. Aber ich bin zuversichtlich, dass du genug weißt, um den Schatz zu
+   finden.
+
+   @@latex:\bigskip\noindent@@
+   Viel Erfolg!
+* Linux Shell - Zweiter Teil
+** Kommandos
+*** List   
+**** ls (list) - mit Wildcards
+
+     Die Liste von Dateien kann manchmal sehr umfangreich werden. Um nur die Dateien aufgelistet zu bekommen, an denen du interessiert bist,
+     kann ein Trick verwendet werden.
+
+     Die Wildcards oder auch Platzhalter.
+
+     *Probier mal folgendes Kommando aus*
+     #+begin_src sh
+       ls *.txt
+     #+end_src
+     Wenn alles gut gelaufen ist bekommst du nun nicht alle Dateien angezeigt sondern nur die, die auf ~'.txt'~ enden. Damit wird die List
+     schon deutlich überschaubarer
+
+     *Probier jetzt mal nur die Dateien aufzulisten, die auf ~.pdf~ enden.*
+
+     Du hast es sicher schon erraten. Das Kommando hierfür ist:
+     #+begin_src sh
+       ls *.pdf
+     #+end_src
+     
+**** ls (list) - mit einer Datei
+
+     Bist du nur an einer Datei interessiert, kannst du den List Befehl (~ls~) auch mit dieser Datei als Parameter aufrufen.
+     #+begin_src sh
+       ls MeinText.txt
+     #+end_src
+     Die Liste wird dann noch weiter eingeschränkt auf diese eine Datei. 
+**** ls (list) - mit Details
+
+     Um noch mehr Details über deine Datei zu erfahren, kannst du noch weitere Parameter nutzen.
+     #+begin_src sh
+       ls -l MeinText.txt
+     #+end_src
+     Du bekommst nun eine Zeile mit Details ausgegeben, die folgende Informationen beinhalten:
+     #+begin_src text
+       -rw-r--r-- 1 annemike users 12087 Jan  3 06:11 MeinText.txt
+     #+end_src
+     Den Anfang überspringen wir erstmal und kommen gleich zu dem Besitzer der Datei. Das bist du.
+
+     Der Computer merkt sich wer die Datei angelegt hat. Für den Computer bist du ein Nutzer (user). Außerdem sagt der Computer dir wieviel
+     Speicher deine Datei braucht. In diesem Fall sind es 12087 Bytes. Außerdem kann er noch sagen, wann diese Datei das letzte Mal
+     verändert wurde, hier nämlich am 3. Januar um 6 Uhr 11.
+
+     Mit dem Parameter ~'-l'~ kannst du also so einiges über deine Dateien herausfinden.
+
+     *Verwende nun einmal Wildcards und dieses Parameter zusammen.* Was beobachtest du?
+**** ls (list) - mit Verzeichnisname
+
+     In einem Verzeichnis können auch sogenannte Unterverzeichnisse sein. Diese kannst du dir auch anschauen, ohne direkt dahin zu springen
+     bzw. in diese Verzeichnisse hineinzuwechseln siehe auch [[cd (change directory)][cd (change directory)]] im vorherigen Kapitel.
+
+     Willst du also den Inhal des Verzeichnisses ~subdir1~ anschauen, ohne mit ~cd~ hineinzuwechseln, gebe folgenden Befehl ein:
+     #+begin_src sh
+       ls subdir1
+     #+end_src
+     Was bekommst du zu sehen? In welchem Verzeichnis bist du jetzt (noch)?
+*** Spezielle Verzeichnisnamen
+     Alle Dateien auf deinem Computer sind in einer Struktur untergebracht die einem Baum mit vielen Schubladen ähnelt.
+     Eine Schublade enspricht in diesem Bild einem Verzeichnis. Es gibt nun einige spezielle Verzeichnisnamen, die genutzt werden können, um
+     sich schnell in diesem /Baum/ zu bewegen.
+
+**** Das Home-Verzeichnis ~~~
+
+     Mit dem Befehl ~cd ~~ landest du immer in deinem Home-Verzeichnis. Dies solte auch immer der Ausgangspunkt für deine Experimente
+     sein. Dies ist dein Verzeichnis in dem du schalten und walten darfst wie es dir gefällt.
+     
+**** Die Wurzel (root) ~/~
+
+     Um an die Wurzel des Baums zu navigieren kannst du das Kommando ~cd /~ verwenden. Hier beginnt der gesammte Verzeichnisbaum. Von hier aus
+     kommst du an alle weiteren Verzeichnisse und Dateien. Die Wurzel selbst ist ziemlich langweilig und enthält vieles, was für den
+     Computer notwendig ist, aber Menschen selten bis gar nicht brauchen.
+     
+**** Das aktuelle Verzeichnis ~.~
+
+     Der einfach Punkt ist eine Abkürzung für das aktuelle Verzeichnis. D.h. das Kommando ~cd .~ (wechsle in da aktuelle Verzeichnis) macht
+     effektiv nichts (da du ja dahin wechselst wo du schon bist). Es ist manchmal nützlich bei anderen Befehlen (z.B. beim Kopieren) aber
+     dazu später mehr.
+     
+**** Das übergeordnete Verzeichnis (parent) ~..~
+
+     Um in deinem Verzeichnisbaum wieder ein Schritt in Richtung Wurzel zu navigieren, kannst du den Befehl ~cd ..~ verwenden. *Probier diesen
+     Befehl mal aus!* Liste dir nun den Inhalt mal auf (mit ~ls~). Um wieder zurück zu kommen ist das Home-Verzeichnis sehr nützlich (~cd ~~).
+     
+*** Suchen und Finden
+    
+    Jede Datei auf deinem Computer kann eindeutig über den Dateinamen und das Verzeichnis identifiert und gefunden werden. Um eine Datei
+    wiederzufinden brauchst du also genau das, den Dateinamen und das Verzeichnis, sonst findest du sie nicht so leicht wieder.
+
+    Solltest du mal vergessen haben, wo (in welchem Verzeichnis) du eine Datei /abgelegt/ hast, hilft dir ein Kommando: ~find~. Um z.B. eine
+    Datei zu finden, die den Namen ~MeinProgramm.rkt~ heißt, kannst du den Befehl
+    #+begin_src sh
+      find . -name "MeinProgramm.rkt"
+    #+end_src
+    verwendent. Erinnere dich daran, dass ~.~ das Kürzel für das aktuelle Verzeichnis ist. Damit sagst du ~find~, dass es den Verzeichnisbaum
+    aus gehend vom aktuellen Verzeichnis durchsuchen soll, und zwar nach einer Date mit dem, Name ~MeinProgramm.rkt~. Suchen kannst du
+    glücklicherweise auch mit /Wildcards/ falls du z.B. alle Dateien finden willst, die auf ~.rkt~ enden (also alle Racket Programme) kannst du
+    #+begin_src sh
+      find . -name "*.rkt"
+    #+end_src
+    verwenden. *Probier das mal aus!* Die List der gefundenen Dateien kann sehr lange werden, wenn du viele solche Dateien auf deinem Computer
+    hast.
+    
+*** cp (copy)
+
+    Das Kopieren ist nun der letzt Befehl, den du hier gebrauchen kannst. Damit kannst du Dateien (und tatsächlich sogar ganze Verzeichnisse
+    mit allen darin enthaltenen Dateien) kopieren. Dateien zu kopieren kann sehr nützlich sein. Du kannst z.B. Dateien von deinem Computer
+    auf dein Handy kopieren (z.B. Musik). Du kannst Dateien auf einen USB Stick kopieren und diesen weitergeben.
+    #+begin_src sh
+      cp ErsteSchritte.rkt ErsteSchritte.Kopie.rkt
+    #+end_src
+    Dieser Befehl macht eine Kopie von der Datei ~ErsteSchritte.rkt~. Die Kopie selbst lautet ~ErsteSchritte.Kopie.rkt~. Die Kopie ist (außer
+    durch ihren Namen) nicht von dem Original zu unterscheiden. Du kannst ja mal den Inhalt der beiden Dateien mit dem Befehl ~cat~
+    anschauen. Nicht zu unterscheiden, richtig?
+
+    Wichtig bei diesem Befehl ist, daß das Original als erstes auf den Befehl ~cp~ folgt und zum Schluß der Name der Kopie folgt.
+
+    - VORSICHT :: Falls es bereits eine Datei gibt, die genauso heißt wie die Kopie, dann geht diese verloren. Sei also bitte sicher, dass
+      keine Datei mit dem Namen der Kopie existiert, bevor du diesen Befehl nutzt.
+
+    *So, jetzt mach aber mal eine Kopie von einer Datei deiner Wahl!* Du kannst auch mal den Befehl ~ls -l~ ausführen, um die Größen des
+    Originals mit der, der Kopie zu vergleichen.
+      
+* DrRacket - Starten
+** Die Umgebung
+*** DrRacket
+**** Überblick
+
+     Den Start dieses Programms kennst du schon aus einer anderen Session.
+     #+begin_src sh
+       drracket
+     #+end_src
+     Die Menüleiste (wobei erstmal nur die fettgedruckten Element wichtig sind) gliedert sich in:
+     - *Datei* : öffnen, speichern, drucken
+     - Bearbeiten : suchen, ersetzen, kopieren, einfügen
+     - Anzeigen : ändern der Darstellung, unterschiedliche Ansichten
+     - Sprache : Computer Sprache auswählen
+     - *Racket* : die Sprache Racket ausführen und damit arbeiten
+     - Einfügen : vorgefertigte Elemente einfügen
+     - Scripts : interne Helferprogramme verwalten
+     - Tabs : aktuelle Tab-Ansicht ändern
+     - Hilfe : zu unterschiedlichsten Dingen
+
+     Das Fenster ingesamt teilt sich grob auf in den Programm-Bereich (oben) und den Repl-Bereich (unten).
+
+     Außerdem ist direkt unter dem Menü noch ein paar Schnellstart Knöpfe zu sehen und ganz untem im Rahmen eine Statusanzeige.
+
+     Jetzt gilt es aber erstmal, ein Programm in DrRacket mal zu starten.
+**** Öffnen
+
+     Nun öffne die Datei ~ErsteSchritte.rkt~ über das Menü ~Datei~ (öffnen ist der dritte Punkt von oben).
+
+     Du siehst nun den Inhalt der Datei ~ErsteSchritte.rkt~. Die Dateiendung ~.rkt~ zeigt, dass es sich hier um ein /Racket/-Programm handelt,
+     mit dem DrRacket wunderbar arbeiten kann.
+
+     Ignoriere zunächst alles bist auf die letzte Zeile
+     #+begin_src racket
+       (circle 20 "solid" "red")
+     #+end_src
+     Kannst du dir denken was dieser Befehl macht? *Schreibe deine Gedanken kurz auf.*
+**** Ausführen
+
+     Jetzt ist es soweit. Jetzt führst du das Programm aus. Hierzu wählst du im Menü unter ~Racket~ den Punkt ~Start~.
+
+     Und? Hast du das erwartet?
+
+     Es ist tatsächlich nicht immer ganz einfach zu erkennen, was ein Programm wirklich macht.
+
+     Ergänze das Programm nun durch eine neue Zeile mit dem Inhalt
+     #+begin_src racket
+       (rectangle 40 20 "outline" "blue")
+     #+end_src
+     Nun kannst du das Programm erneut starten. Diesmal kannst du es direkt über die Schnellstart-Taste ~Start~ rechts-oben in DrRacket
+     starten.
+
+     Ist es das was du erwartet hast?
+**** Anpassen
+
+     Jetzt kommt der Spaß, bei dem du ein Programm, das grundsätzlich erstmal funktioniert, anpassen kannst, um mal zu sehen, was der
+     Computer hier so alles versteht.
+
+     Eine Möglichkeit ist andere Farben mal auszuprobieren (versuche doch mal "yellow").
+
+     Eine weitere Möglichkeit ist die Größen zu verändern. Statt 20 kannst du einfach mal 100 nehmen.
+**** Hilfe zu den Befehlen
+
+     Vielleicht ist dir schon der blau hinterlegte Pfeil rechts oben in dem Fenster aufgefallen. Wenn du mit dem Mauszeiger darüber
+     schwebst, werden dir Zusatzinformationen angezeigt.
+
+     Bewege den Cursor mal auf das Wort ~rectangle~ in dem Program (z.B. zwischen das ~r~ und das ~e~). Nun bewege den Mauszeiger über diesen
+     blauunterlegten Pfeil. Solange der Mauszeiger das neue Fenster nicht verlässt, kannst du ein paar Informationen zu dem Befehl ~rectangle~
+     herauslesen.
+
+     Wenn du nicht gleich verstehst, was da steht, ist das normal. Diese Texte sind für Entwickler geschrieben, die bereits jahrelang damit
+     arbeiten. Was aber auch du bereits herauslesen kannst, sind ein paar Hinweise, wie der Befehl ~rectangle~ zu benutzen ist.
+
+     1. Der Befehl beginnt immer mit einer Klammer auf ~'('~ und endet mit einer Klammer zu ~')'~
+     2. Der eigentliche Befehl selbst, ~rectangle~, steht dann direkt hinter der ersten Klammer
+     3. Dann folgen ~width~, ~height~, ~mode~ und ~color~, also Breite, Höhe, Modus und Farbe. Das sind die Parameter. Die Parameter bestimmen
+        welches Rechteck der Computer nun tatsächlich malt, nämlich die Breite, Höhe, ob die Figur ausgefüllt oder nur der Rahmen gemalt
+        werden soll und welche Farbe das ganze haben soll.
+
+     Diese Hilfe ist aber nur eine kurze Übersicht und ist nicht wirklich vollständig. So steht hier z.B. nicht, welche Farben es gibt. Wenn
+     du aber genau hinschaust, so siehst du in diesem /Hilfe-Fenster/ den Hinweis (ganz unten): ~Mehr hier nachlesen ...~.
+
+     Wenn du auf diesen Text mit der Maus /clickst/, dann wird der Browser geöffnet und du bekommst noch viel, viel mehr Informationen.
+
+     Auch hier gilt wieder: es ist normal diese Informationen erstmal überhaupt nicht zu verstehen. Aber mit der Zeit wirst du ein paar
+     Techniken lernen, wie du ein paar Abschnitte dieser /Dokumentation/ zu lesen lernst.
+
+     Interessant wäre es z.B. welche Farben es nun gibt. Wenn du die Beschreibung des Befehls ~rectangle~ nun ansiehst, gibt es die Zeile
+     ~color : image-color?~. Der Text ~image-color?~ ist zudem blau geschrieben und deutet an, daß dieser Text /geclickt/ werden darf.
+
+     *Click auf den blauen Text ~image-color?~.* Was passiert?
+
+     Jetzt solltest du ein paar Farben sehen, die mit ~rectangle~ verwendet werden dürfen.
+
+     *Probier davon ein paar in deinem Programm aus!*
+
+**** Speichern
+
+     Nachdem du nun einiges ausprobiert hast, macht es Sinn deine Arbeit an diesem Programm auch zu speichern, damit nach dem Ausschalten
+     des Computers diese Änderungen auch erhalten bleiben.
+
+     Für das Speichern gibt es auch wieder ein Schnellstart-Knopf. Dieser erscheint immer genau dann, wenn du Änderungen an dem Programm
+     vorgenommen hast in der Gestalt eines Diskettensymbols, das du möglicherweise schon von anderen Programmen her kennst.
+
+     Clickst du diesen Knopf, wird das Programm gespeichert und der Knopf verschwindet, bis du wieder Änderungen an deinem Programm vornimmst.
+* DrRacket - Repl
+** Read Eval Print Loop (Repl)
+   Read Eval Print Loop steht für Einlesen Auswerten Ausgeben Schleife und das ist genau das was wir mit dem Computer als nächstes machen werden.
+*** DrRacket
+**** Repl - Bereich
+
+     Im unteren Bereich von DrRacket findest du den Repl Bereich. Hier kannst du direkt und unmittelbar mit dem Computer
+     kommunizieren. Ähnlich wie mit der Shell werden Befehle direkt nach der Druck von ~Enter~ auf deiner Tastatur vom Computer ausgeführt,
+     soweit er den Befehl versteht.
+     Hier haben wir nun die Möglichkeit dem Computer in der Sprache /Racket/ zu sprechen.
+
+     - HINWEIS :: Wenn du einen Befehl im Repl wiederholen willst (oder auch nur leicht anpassen willst), dann drücke ~Ctrl-↑~, als die ~Ctrl~
+       oder auch ~Strg~ Taste herunterhalten und den Pfeil nach oben auf deiner Tastatur pressen. 
+
+**** Erste Befehle
+
+     Einige der Befehle hattest du schon kennengelernt. Probier im Repl doch mal folgendes einzugeben
+     #+begin_src racket
+       (circle 10 "solid" "red")
+     #+end_src
+     Vermutlich bekommst du nun erstmal nur einen Fehler ~circle: undefined;~. Der Computer kennt den Befehl (noch) nicht. Der Computer muß
+     erst noch eine Bibliothek (library) laden. Wie gesagt, Computer sind nach dem Einschalten erstmal sehr unwissend.
+
+     Der Computer soll nun eine Bibliothek laden, die es ermöglicht Befehle wie ~circle~ oder ~rectangle~ auszuführen.
+
+     Dazu gebe Folgendes ein
+     #+begin_src racket
+       (require 2htdp/image)
+     #+end_src
+     Wenn du jetzt noch mal den Befehl von oben (also der mit ~circle~) probierst, sollte die Ausgabe passen und kein Fehler mehr
+     kommen. Jetzt müsste auch ~rectangle~ functionieren. Probier es mal aus.
+
+**** Jetzt wird komponiert
+
+     Du wirst jetzt ein paar Befehle kennenlernen, die einzelne Figuren zusammensetzen, ~above~ (über) und ~beside~ (daneben).
+
+     Zwei Häuser nebeneinander
+     #+begin_src racket
+       (above (beside (triangle 40 "solid" "red")
+                      (triangle 40 "solid" "red"))
+              (rectangle 80 40 "solid" "green"))
+     #+end_src
+     Dabei werden zwei dreieckige Dächer (~triangle~) nebeneinander (~beside~) gemalt und dann über (~above~) die Hauswand (~rectangle~) gesetzt.
+
+     Experimentiere gerne ein bisschen mit diesen Figuren und deren Größen! Mal sehen was da so raus kommt.
+
+     Erinnere dich, mit ~Ctrl-↑~ etwas, was du vorher eingegeben hast, wieder zu holen, um es z.B. leicht anzupassen (mit ~Ctrl-↓~ kannst du
+     auch mal experimentieren).
+**** Ein Haus Experiment
+
+     Das eine Dach ein bisschen kleiner
+     #+begin_src racket
+       (above (beside (triangle 40 "solid" "red")
+                      (triangle 30 "solid" "red"))
+              (rectangle 70 40 "solid" "green"))
+     #+end_src
+     Da ist doch noch ein ungewollter Abstand! ~beside~ passt in diesem Fall wohl nicht ganz.
+     #+begin_src racket
+       (above (beside/align "bottom"
+                            (triangle 40 "solid" "red")
+                            (triangle 30 "solid" "red"))
+              (rectangle 70 40 "solid" "green"))
+     #+end_src
+**** Haus mit Konstanten
+
+     Damit nicht immer alles neu eingetippt werden muß, kannst du Konstanten definieren und dir damit ordentlich Tipparbeit sparen!
+     #+begin_src racket
+       (define victorian
+         (above (beside/align "bottom"
+                            (triangle 40 "solid" "red")
+                            (triangle 30 "solid" "red"))
+              (rectangle 70 40 "solid" "green")))
+     #+end_src
+     Wenn du das eingegeben hast, passiert erstmal gar nichts. Nanu?
+
+     Wenn du jetzt aber den Konstanten Namen ~victorian~ eingibst, tata. Gibt diesen Name gleich ein zweites mal ein. Du siehst du sparst dir
+     eine Menge Arbeit beim Tippen.
+
+     Jetzt verfeinern wir das Haus noch ein bisschen. Wir definieren uns eine Tür
+     #+begin_src racket
+       (define door (rectangle 15 25 "solid" "brown"))
+     #+end_src
+     und packen sie an unser Haus
+     #+begin_src racket
+       (overlay/align "center" "bottom" door victorian)
+     #+end_src
+     Die Tür sieht mit einem Drehknopf doch viel schnöner aus
+     #+begin_src racket
+       (define door-with-knob
+         (overlay/align "right" "center" (circle 3 "solid" "yellow") door))
+     #+end_src
+     und schon ist das Haus noch ein bisschen schöner geworden
+     #+begin_src racket
+       (overlay/align "center" "bottom" door-with-knob victorian)
+     #+end_src
+
+**** Konstanten
+
+     Mit Konstanten hast du nun komplexen Figuren /Namen/ gegeben und kannst diese Figuren allein durch ihren Namen verwenden. Konstante
+     werden sie genannt, weil sie nicht mehr verändert werden und du dich darauf verlassen kannst, mit diesem Name (z.B. ~victorian~) dann
+     immer das gleiche zu bekommen.
+
+     Einmal definiert (~define~) kannst du diese Konstanten verwenden und sparst dir dadurch eine Menge Tipparbeit.
+
+**** Vom Repl zum Programm
+
+     Jetzt hast du einiges im Repl geschrieben. Wenn du DrRacket aus Versehen schließt, hat der Computer das alles vergessen. Also bevor du
+     das machst, kopiere dir alles was du behalten willst aus dem Repl in den Programm-Bereich.
+
+     Du kannst mit der Maus einen Bereich markieren und mit ~Ctrl-c~ kopieren bzw. merken (also ~Ctrl~ drücken und gedrückt halten während du dann ~c~
+     drückst) und dann im Programm-Bereich mit den Cursor an die Stelle gehen, wo du es einfügen willst. Mit ~Ctrl-v~ fügst du dann den
+     kopierten/gemerkten Anteil ein.
+
+     Wenn du alles in den Programm-Bereich kopiert hast, was du behalten willst, speichere das Program (z.b. mit der Schnell-Taste mit dem
+     Disketten Symbol). Dann kannst du es auch beim nächsten Start von DrRacket noch mal verwenden.
+
+* DrRacket - Funktionen
+** Funktionen
+  Hier schauen wir uns eines der wichtigsten Elemente der Programmierung genauer an. Die Funktion.
+  Aus der Mathematik kennst du den Begriff der Funktion vielleicht schon. Dort hast du eine Funktion wie z.B. $$f(x) = ...$$ bestimmt schon
+  mal gesehen. Tatsächlich ähneln sich Mathematik und Programmierung hier, wobei die Mathematik etwas strenger ist.
+   In der letzten Session hast du bereits einige Funktionen genutzt, ohne dass wir darauf eingegangen sind. Eine Nuztung ist z.B.
+   #+begin_src racket
+     (rectangle 10 20 "solid" "red")
+   #+end_src
+   gewesen. Hier wird die Funktion mit dem Namen ~rectangle~ genutzt. Die Nutzung einer Funktion unterscheidet sich von der Nuztung einer
+   Konstante. Bei der Konstante erinnerst du dich vielleicht, reichte das Schreiben der Konstante selbst, um in der Repl das Ergebnis zu
+   beobachten (siehe Konstante ~victorian~ aus der letzten Session).
+
+   Der Aufruf einer Funktion folgt immer dem Schema ~'('~, also Klammer auf, dann der Funktionsname, dann die Parameter (jeweils durch ein
+   Leerzeichen getrennt) und abschließend ~')'~, also Klammer zu.
+
+*** Parameter
+
+    Parameter sind Werte, mit denen du die Funktion beeinflussen kannst. Du kannst z.B. die gleiche Funktion ~rectangle~ nutzen, um kleine oder
+    auch große Rechtecke zu erzeugen.
+    #+begin_src racket :lang racket
+      (rectangle 10 20 "solid" "red")
+      (rectangle 50 100 "solid" "green")
+    #+end_src
+    Eine Funktion kann gar keine, oder sehr viele Parameter haben. Das kannst du selbst bestimmen, wenn du eine Funktion selber
+    schreibst. Ansonsten musst du damit leben, wie andere die Funktionen geschrieben haben. Bei der Funktion ~rectangle~ z.B. sind immer vier
+    Parameter notwendig. Wir schreiben jetzt zusammen eine eigene Funktion, bei der wir bestimmen, wieviele Parameter sie haben soll.
+*** Eigene Parameter
+    Wir schreiben nun eine Funktion, die genauso wie ~rectangle~ eben Rechtecke erzeugt, aber wollen diese Funktion mit nur 3 Parametern
+    versehen. Einmal die Breite, die Höhe und die Farbe. Da wir immer ausgefüllte Rechtecke erzeugen wollen, brauchen wir keine weiteren
+    Parameter.
+    Das sieht dann so aus:
+    #+begin_src racket :lang racket
+      (define (ausgefülltes-rechteck breite höhe farbe)
+        (rectangle breite höhe "solid" farbe))
+    #+end_src
+    Nun kannst du mit:
+    #+begin_src racket
+      (ausgefülltes-rechteck 10 20 "red")
+    #+end_src
+    ausgefüllte Rechtecke erzeugen.
+
+    Die Definition einer Funktion folgt immer dem Schema ~'(define ('~, dann der Funktionsname, dann die Parameter (jeweils durch ein
+    Leerzeichen getrennt), dann eine abschließende Klammer zu ~')'~ und dann folgt ein Functions Aufruf gefolgt von einer abschließenden
+    Klammer zu ~')'~.
+
+    Damit du bei den ganzen Klammer auf und zu nicht durcheinander kommst, zeigt dir DrRacket immer an, welche Klammer auf mit welcher
+    Klammer zu zusammenhängt. DrRacket markiert den gesamten Text zwischen den zusammenpassenden Klammern und erleichtert dir damit zu
+    erkennen, ob alle Klammer richtig geschlossen sind. Der Computer ist an dieser stelle sehr pingelig und gibt ansonsten Fehlermeldungen
+    aus, die manchmal etwas schwer zu verstehen sind.
+
+    *Probier mal aus dem Beispiel oben einfach eine Klammer zu löschen.* Probier es mit einer Klammer zu und danach mal mit einer Klammer
+    auf. Welche Fehlermeldung bekommst du zu sehen (werden ganz unten in deinem DrRacket Fenster gezeigt)? Wenn du die Klammer wieder
+    hinzufügst, sollte die Fehlermeldung auch wieder verschwinden. *Probier auch das mal aus!*
+   
+    *Nun schreibe mal selber eine Funktion!* Z.B. eine Funktion, die immer grüne, ausgefüllte Rechtecke erzeugt und nur noch
+    Breite und Höhe als Parameter hat. Orientiere dich an dem Beispiel von oben.
+*** Dokumentation
+    Damit andere und du selbst deinen Programmcode verstehen ist es oft angebracht zu deinem Code Dokumentation zu liefern. Dokumentation
+    hilft anderen und dir herauszufinden, wie dein Code richtig genutzt werden kann. Ohne die Dokumentation der Farben hätten wir z.B. nie
+    herausbekommen, wie wir ~rectangle~ dazu bringen können, rote Rechtecke zu erzeugen.
+
+    Eine Art der Dokumentation ist die, die direkt in den Code geschrieben wird. Der Computer ignoriert diese /Kommentare/, die der Computer
+    meistens auch gar nicht verstehen kann. Die Kommentare sollen Menschen helfen, nicht Computern.
+
+    In diesem Beispiel ist unsere Funktion mal durch ein Kommentar ergänzt, das es anderen erleichtert zu verstehen, was deine Funktion
+    macht und welche Parameter sie erwartet:
+    #+begin_src racket
+      ;; Erzeuge ein ausgefülltes Rechteck mit Breite, Höhe und Farbe
+      ;; Beispiel: (ausgefülltes-rechteck 10 20 "red")
+      (define (ausgefülltes-rechteck breite höhe farbe)
+        (rectangle breite höhe "solid" farbe))
+    #+end_src
+    Die zwei Kommentare hier beginnen mit ~;;~. Der Computer ignoriert den gesamten Text bis zu nächsten Zeile, daher kannst du da schreiben
+    was du willst.
+
+    Das erste Kommentar ist nicht wirklich hilfreich, da es doch ziemlich genau das wiederholt, was nach dem ~define~ bereits steht. Ein
+    solches Kommentar wird normalerweise einfach weggelassen.
+
+    Das zweite Kommentar ist da schon hilfreicher. Es zeigt direkt ein Beispiel, wie deine Funktion genutzt werden kann. Aus diesem Beispiel
+    kann z.B. herausgelesen werden, wie Farben als Parameter übergeben werden oder wie Höhe und Breite genutzt werden können.
+
+    *Schreibe nun Kommentare für deine eigene Funktion!* Wähle dein Kommentar so, dass du in ein paar Wochen noch erkennen kannst, was deine
+    Funktion so macht und wie sie benutzen werden kann.
+* Libresprite - Kacheln
+** Kacheln
+  Das Spiel mit dem du dich beschäftgen wirst, kannst du dir vorstellen wie ein Brettspiel. Der Computer übernimmt die Darstellung des
+  Spielbretts, der Spielsteine und was immer dir noch so einfällt.
+  Das Spielbrett setzt du dann zusammen aus einfachen /Stücken/, den sogenannten Kacheln. Diese Kacheln sind alle gleich groß, sodaß du sie wie
+  z.B. bei einem Schachbrett zu einer größeren Spielfläche zusammenstellen kannst.
+
+  Wir beginnen mit einem einfachen Satz von Kacheln, die du dann später gerne um weitere ergänzen kannst. Bei der Größe der Kacheln ist
+  vermutlich etwas wie 32x32 für den Start sinnvoll. Die Figuren und Gegenstände, die wir dann später darauf setzen, werden dann eben etwas
+  kleiner ausfallen.
+*** Boden
+    Bei unserem Spiel wird der Boden etwas sein, über das deine Spielfigur einfach laufen kann. Das könnte z.B. ein Steinboden oder ein
+    Holzboden sein.
+    *Zeichne jetzt einen Boden in libresprite!* Das muß nicht gleich beim ersten Versuch der schönste Boden werden, er sollte aber als Boden
+    erkennbar sein.
+*** Wand
+    Eine Wand beschränkt die Spielfigur in seinen Bewegungen auf dem Spielfeld. Durch eine Wand kann eine Spielfigur nicht
+    hindurchgehen. Auch bei der Wand kannst du dir überlegen, ob du sie lieber aus Holz oder Stein haben willst.
+    *Zeichne jetzt eine Wand in libresprite!* Das muß nicht gleich beim ersten Versuch die schönste Wand werden, sie sollte sich aber schon
+    vom Boden unterscheiden und damit als Wand erkennbar sein.
+*** Tür
+    Eine Tür soll der Spielfigur später erlauben in Räume zu kommen, die ansonsten von Wänden umschlossen sind. Auch hier kannst du wieder
+    überlegen, wie eine Tür auf deinem Spielfeld aussehen soll.
+    *Zeichne jetzt eine Tür in libresprite!*
+** Gegenstände
+*** Kiste
+*** Teppich
+* DrRacket - Bilder zusammenstellen
+** Spielfeld
+  Jetzt wo wir ein paar /Kacheln/ und Gegenstände haben, können wir mal anfangen, diese mit unserem Program zu einem Spielfeld zusammenzusetzen.
+  Fangen wir mit einem Spielfeld an das gerade mal 4 x 4 Felder groß ist. Später können wir es dann größer machen. Für den Anfang halten wir
+  es aber klein.
+*** Liste
+    Für das Spielfeld nehmen wir eine Liste von /Kacheln/. Jedes Kachel bekommt eine Nummer bzw. Position in der Liste. Das Spielfeld bekommt
+    dann folgende Kacheln:
+    |  1 |  2 |  3 |  4 |
+    |  5 |  6 |  7 |  8 |
+    |  9 | 10 | 11 | 12 |
+    | 13 | 14 | 15 | 16 |
+
+    Links oben ist Kachel 1, dann 2 und so weiter. In der nächsten Reihe kommt dann 5, gefolgt von 6 etc. Das letzte Kachel ist dann das mit der
+    Nummer 16.
+
+    Eine Beispiel Spielbrett wäre dann z.B.
+    #+begin_src racket
+      (define spielfeld
+        (list 'wand 'wand  'wand  'wand
+              'wand 'boden 'boden 'wand
+              'wand 'boden 'boden 'wand
+              'wand 'wand  'wand  'wand))
+    #+end_src
+    Das Spielfeld ist quasi ein Boden aus 4 Kacheln, umranded von Wänden. Der Code liest sich: /Definiere ein Spielfeld als Liste aus Wand,
+    Wand .../
+
+*** Malen
+    Jetzt kommt das Malen des Spielfeldes. Jetzt wird es richtig kompliziert. Es ist aber ok, wenn du den Code der jetzt kommst einfach
+    erstmal übernimmst, ohne alle Details schon zu verstehen. Dazu kommen wir noch.
+**** Die Bilder
+
+     Als erstes beschreibst du deinem Programm, wo es die Bilder findet, die du brauchst, um das Spielfeld zu malen. Zunächst brauchen wir
+     nur die Wand und den Boden.
+      #+begin_src racket :lang racket
+        (define WAND-BILD  (bitmap "images/wall.gif"))
+        (define BODEN-BILD (bitmap "images/mud.gif"))
+      #+end_src
+**** Kachel -> Bild
+
+     Im Spielfeld haben wir nur ~'wand~ und ~'boden~ genutzt und müssen im Programm dem Computer noch sagen, wann er nun welches Bild nutzen
+     soll. Am Namen können wir bereits sehen was zusammen paßt. Der Computer kann das nicht. Dem müssen wir es im Programm explizit
+     sagen. D.h. wir sagen ihm mit ~'wand~ erzeugst du das ~WAND-BILD~, mit ~'boden~ das ~BODEN-BILD~.
+     #+begin_src racket
+       (define (kachel->bild kachel)
+         (cond
+           [(eq? kachel 'wand)  WAND-BILD]
+           [(eq? kachel 'boden) BODEN-BILD]))
+     #+end_src
+**** Größe der Kacheln
+
+     Für die folgenden Berechnungen mußt du dem Computer noch sagen wie groß die Kacheln tatsächlich sind. Hier könnne wir später auch mal
+     Veränderungen vornehmen, wenn wir Kacheln größer oder kleiner machen wollen.
+     #+begin_src racket
+       (define KACHEL-BREITE 50)
+       (define KACHEL-HÖHE 50)
+     #+end_src
+**** Position
+
+     Das Bestimmen der Position für unsere Kacheln ist nun echt kompliziert und brauchst du nun wirklich nicht zu verstehen. Wenn du Interesse
+     hast, können wir uns das dann später noch mal gemeinsam anschauen. Was du Computer mitteilen mußt, ist wo er die Kacheln auf dem
+     Bildschirm malen soll. Dazu verwendet der Computer ein Koordinatensystem, wie du es aus der Schule vermutlich schon kennst. Jedes Kachel
+     bekommt eine x- und eine y-Koordinate. Für unser 4 x 4 Spielfeld sehen die Koordinate so aus:
+
+     | (x=0, y=0)   | (x=50, y=0)   | (x=100, y=0)   | (x=150, y=0)   |
+     | (x=0, y=50)  | (x=50, y=50)  | (x=100, y=50)  | (x=150, y=50)  |
+     | (x=0, y=100) | (x=50, y=100) | (x=100, y=100) | (x=150, y=100) |
+     | (x=0, y=150) | (x=50, y=150) | (x=100, y=150) | (x=150, y=150) |
+
+     Die folgende Funktion berechnet nun diese Tabelle. Tatsächlich verschiebt sie das ganze nochmal um 25 nach unten und rechts, das soll
+     aber hier erstmal noch keine Rolle spielen.
+     #+begin_src racket
+       (define (kachel->posn)
+         (map (lambda (number)
+                (make-posn (+ (/ KACHEL-BREITE 2)
+                              (* KACHEL-BREITE (modulo number 4)))
+                           (+ (/ KACHEL-HÖHE 2)
+                              (* KACHEL-HÖHE (quotient number 4)))))
+              (range 0 16)))
+     #+end_src
+     Du kannst dir die Berechneten Positionen nun direkt im Repl mit dem Befehl ~(kachel->posn)~ ausgeben lassen. Was fällt dir auf?
+**** Leere Startszene
+
+     Beim Zeichnen des Spielfeldes wird dem Computer noch mitgeteilt, wie groß eine Szene tatsächlich ist und ein leeres Spielbrett als
+     Grundlage für weitere Szenen beschrieben.
+
+     Eine leere Szene ist 4 mal die Breite eines Kacheln breit und 4 mal die Höhe eines Kacheln hoch. Da Grundfarbe ist schwarz.
+     #+begin_src racket
+       (define start-szene
+         (empty-scene (* 4 KACHEL-BREITE)
+                      (* 4 KACHEL-HÖHE)
+                      "black"))
+     #+end_src
+**** Spielfeld
+
+     Nun kannst du beschreiben wie das das Spielfeld gemalt werden soll. Für das Spielfeld werden alle Bilder geholt (~kachel->bild~), die
+     Positionen werden berechnet (~kachel->posn~) und die zugrundeliegende Szene genutzt, um die Bilder alle an die richtige Stelle zu malen
+     (~place-images~).
+     #+begin_src racket
+       (define (spielfeld-szene das-spielfeld die-szene)  
+         (place-images (map kachel->bild das-spielfeld)
+                       (kachel->posn)
+                       die-szene))
+     #+end_src
+**** Endlich malen
+
+     Endlich. Mit folgendem Befehl kannst du dein erstes Spielfeld malen!
+     #+begin_src racket
+       (spielfeld-szene spielfeld start-szene)
+     #+end_src
+*** Eigenes Spielfeld
+
+    Jetzt kannst du mal ein bisschen experimentieren mit dem Programm. Als erstes kannst du mal das Spielfeld verändern. Du könntest
+    z.B. das Spielfeld so anpassen, daß außen der Boden ist und nur in der Mitte Wände sind.
+    Passe hierzu die Definition von ~spielfeld~ an.
+    Dein Code könnte dann so aussehen:
+    #+begin_src racket
+      (define spielfeld
+        (list 'boden 'boden 'boden 'boden
+              'boden 'wand  'wand  'boden
+              'boden 'wand  'wand  'boden
+              'boden 'boden 'boden 'boden))
+    #+end_src
+    Du kannst auch mal ein Spielfeld zeichnen, wo nur oben und rechts Wände sind, oder eine Wand quer durch dein Spielfeld geht. *Erzeuge
+    mal verschiedene Spielfelder und lasse sie durch den Computer zeichnen.*
+    
+*** Größeres Spielfeld
+    Um ein größeres Spielfeld zu erzeugen müssen wir den Code noch ein bisschen anpassen. Wir haben an vielen Stellen 4 oder auch 4 * 4 (16)
+    stehen. Wenn du Spielfelder unterschiedlicher Größen erlauben willst, oder einfach häufiger mal ändern willst. Sollten wir das in eigene
+    Konstanten schreiben
+    #+begin_src racket
+      (define SPIELFELD-BREITE 8)
+      (define SPIELFELD-HÖHE 8)
+    #+end_src
+    Damit diese Konstanten auch verwendet werden, müssen wir nun einiges anpassen. Als erstes ist die ~start-szene~ anzupassen.
+     #+begin_src racket
+       (define start-szene
+         (empty-scene (* SPIELFELD-BREITE KACHEL-BREITE)
+                      (* SPIELFELD-HÖHE KACHEL-HÖHE)
+                      "black"))
+     #+end_src
+     *Siehst du was angepasst wurde?* *Was fällt dir auf?*
+
+     Als nächstes muß angepaßt werden, wo die Kacheln auf den Bildschirm gezeichnet werden.
+     #+begin_src racket
+       (define (kachel->posn)
+         (map (lambda (number)
+                (make-posn (+ (/ KACHEL-BREITE 2)
+                              (* KACHEL-BREITE
+                                 (modulo number SPIELFELD-BREITE)))
+                           (+ (/ KACHEL-HÖHE 2)
+                              (* KACHEL-HÖHE
+                                 (quotient number SPIELFELD-HÖHE)))))
+              (range 0 (* SPIELFELD-BREITE SPIELFELD-HÖHE))))
+     #+end_src
+     Natürlich gilt es nun auch das Spielfeld selbst anzupassen. Du mußt dazu sicherstellen, daß auch wirklich 8 x 8 Kacheln auf dem Spielfeld
+     sind.
+     #+begin_src racket
+      (define spielfeld
+        (list 'boden 'boden 'boden 'boden 'boden 'boden 'boden 'wand
+              'boden 'wand  'boden 'boden 'boden 'boden 'boden 'wand
+              'boden 'wand  'boden 'boden 'boden 'boden 'boden 'wand
+              'boden 'wand  'boden 'boden 'boden 'boden 'boden 'wand
+              'boden 'wand  'boden 'boden 'boden 'boden 'boden 'wand
+              'boden 'wand  'boden 'boden 'boden 'boden 'boden 'wand
+              'boden 'wand  'boden 'boden 'boden 'boden 'boden 'wand
+              'boden 'boden 'boden 'boden 'boden 'boden 'boden 'wand))
+     #+end_src
+    *Zeichne dieses Spielfeld!* Gefällt es dir? Passe es mal an, um ein größeres Spielfeld deiner Wahl zu erzeugen. Ich bin gespannt.
+* DrRacket - Mehr Funktionen
+** Funktionen
+   Wir schauen uns jetzt mal ein paar Funktionen an, die du beim Malen des Spielfeldes genutzt hast und besprechen im Detail, wie sie
+   aufgebaut sind.
+*** Allgemeines
+    Nochmal zur Erinnerung: Eine Funktion wird definiert durch:
+    #+begin_src racket
+      (define (funktions-name parameter-1 parameter-2)
+        funktions-körper)
+    #+end_src
+    Dabei kannst du natürlich den ~funktions-name~, die ~parameter~ und den ~funktions-körper~ frei wählen. 
+*** Kachel->Bild
+    Mit dieser Funktion wandelst du eine Kachel in ein Bild. Hier nochmal zur Erinnerung:
+    #+begin_src racket
+      (define (kachel->bild kachel)
+        (cond
+          [(eq? kachel 'wand)  WAND-BILD]
+          [(eq? kachel 'boden) BODEN-BILD]))
+    #+end_src
+    Als Funktionsname wurde hier ~kachel->bild~ gewählt. Diese Funktion hat ein Parameter, nämlich ~kachel~. Der Funktionskörper ist nun etwas
+    komplizierter, lässt sich aber grob in zwei Teile aufteilen.
+    Einmal in den Funktionsblock der mit ~cond~ beginnt und in die Blöcke, die mit ~eq?~ beginnen.
+    
+    ~eq?~ (equal) vergleicht seine parameter und prüft ob diese gleich sind. In unserem Fall wird ~eq?~ zwei mal verwendet. Bei der ersten
+    Verwendung wird geprüft, ob ~kachel~ gleich ~'wand~ also eine Wand ist. Im zweiten Fall wird geprüft ob ~kachel~ gleich ~'boden~ also ein Boden
+    ist. ~eq?~ kann aber viel mehr vergleichen als Kacheln.
+    Probier mal im Repl folgendes ein zu geben:
+    #+begin_src racket
+      (eq? 1 2)
+    #+end_src
+    Hier wird geprüft ob 1 = 2 ist. Das Ergebnis ist ~#f~ was in Racket soviel bedeutet wie /false/, oder /falsch/.
+    Nun kannst du mal folgendes eingeben:
+    #+begin_src racket
+      (eq? 2 2)
+    #+end_src
+    Nun ist das Ergebnis ~#t~, was in Racket soviel bedeutet wie /true/, oder /wahr/.
+
+    Hier haben wir nun Zahlen verglichen. Weiter oben haben wir eine Konstante (genauer ein Parameter der Funktion) mit einer anderen
+    Konstante verglichen.
+    Versuche bitte mal folgende Eingaben im Repl (nacheinander):
+    #+begin_src racket
+      (eq? 'wand 'boden)
+      (eq? 'wand 'wand)
+      (define meine-kachel 'wand)
+      (eq? meine-kachel 'boden)
+      (eq? meine-kachel 'wand)
+    #+end_src
+    Hast du mit den Ergebnissen gerechnet? Kannst du erklären, warum der Computer so reagiert?
+
+    Kommen wir zu dem zweiten wesentlichen Element unseres Funktionskörpers.
+    ~cond~ wird wie eine Funktion verwendet und kann für unseren Fall hier als Funktion verstanden werden.
+    ~cond~ (condition) liefert als Ergebnis den ersten Treffer, der eine /wahre/ Bedingung formuliert. Der erste Fall prüft, ob die Kachel eine
+    Wand ist. Ist das der Fall, liefert ~cond~ als Ergebnis ~WAND-BILD~. Ist das nicht der Fall wird weiter geprüft. Als nächstes wird geprüft
+    ob die Kachel ein Boden ist. Ist das der Fall, liefert ~cond~ als Ergebnis ~BODEN-BILD~. Falls das auch nicht zutrifft liefert ~cond~ die
+    Information, daß es nichts gefunden hat.
+
+    Probieren wir es mal mit den Vergleichen von oben:
+    #+begin_src racket
+      (cond [(eq? 1 2) 'oha]
+            [(eq? 2 2) 'schon-besser])
+    #+end_src
+    Hat dieser Code sich so verhalten, wie du es erwartet hast. Mach mal aus der ersten Bedingung, als aus ~eq? 1 2~ mal auch ein ~eq? 1
+    1~. Dann sieht das Programm so aus:
+    #+begin_src racket
+      (cond [(eq? 1 1) 'oha]
+            [(eq? 2 2) 'schon-besser])
+    #+end_src
+    Was bekommst du jetzt als Ergebnis? Weißt du warum?
+
+    Mit diesem Wissen schauen wir jetzt noch mal auf die Funktion.
+    #+begin_src racket
+      (define (kachel->bild kachel)
+        (cond
+          [(eq? kachel 'wand)  WAND-BILD]
+          [(eq? kachel 'boden) BODEN-BILD]))
+    #+end_src
+    Mit dieser Funktion wird eine ~kachel~ die eben entweder eine Wand (~'wand~) oder ein Boden (~'boden~) sein kann, in das entsprechende Bild
+    umgewandelt.
+    Wenn ich also den Befehl ~(kachel->bild 'wand)~ in die Repl schreibe, bekomme ich das Bild einer Wand (zu sehen). Wenn ich ~(kachel->bild
+    'boden)~ schreibe, eben entsprechend einen Boden.
+
+    Beim Programmieren hast du es oft damit zu tun, wie in der Mathematik, Werte (in diesem Fall ~'wand~ oder ~'boden~) in andere Werte (hier
+    die Bilder) umzuwandeln. Dazu eigenen sich Funktionen eben auch besonders gut!
+*** Eigene Funktion
+    Jezt geht es darum mal eine eigene Funktion zu schreiben. Das klingt wieder komplizierter als es ist. Wir fangen einfach an und steigern
+    uns dann.
+
+    Vielleicht erinnerst du dich an eine Aufgabe aus deinem Mathematik Unterricht, eine Wertetabelle zu erstellen. Das machen wir jetzt
+    auch, aber eben nicht so langweilig wie in Mathe, sondern mit hilfe des Computers, der das besonders gut kann.
+
+    Nehmen wir die Funktion
+    $$f(x) = 2x$$
+    oder anders formuliert, wir verdoppeln einfach jede Zahl.
+
+    In Racket sieht das nun so aus:
+    #+begin_src racket
+      (define (verdopple x)
+        (* 2 x))
+    #+end_src
+    Probier es direkt mal aus und gebe danach ~(verdopple 4)~ in die Repl ein. Na, bist du mit dem Ergebnis zufrieden. Diese Funktion
+    verdoppelt einfach jede Zahl, die ich in die Funktion hineingebe. Probier noch ein paar andere Zahl aus!
+    Kommen wir nun zur Werte Tabelle.
+    Für eine Wertetabelle kannst du das jetzt einfach für alle Werte, die dich interessieren ausführen.
+
+*** Reihenfolge
+
+    Dir ist bestimmt schon aufgefallen, daß $2x$, oder 2 mal x hier irgendwie komisch, nämlich mit ~(* 2 x)~ geschrieben wurde. Das hat
+    folgenden Grund. ~*~ ist eine Funktion. Eine Funktion muß immer hinter der ~'('~ Klammer auf stehen. D.h. ~(* 2 x)~ wird vom Computer gelesen
+    als:
+    /Rufe die Funktion ~*~ auf und nimm als Parameter die ~2~ und ~x~ und liefere das Ergebnis zurück./
+    Die Funktion ~*~ macht nun nichts anderes als alle Parameter miteinander zu multiplizieren (also mal-nehmen) und gibt das Ergebnis zurück.
+
+    *Probier das mal im Repl aus!* Gib einfach mal ~(* 2 3)~ ein. Oder auch ~(* 3 5)~. Das Gleiche gilt übrigens auch für ~+~, oder ~-~ und für viele
+    weitere Operationen. Probier mal ~(+ 1 2)~.
+
+    Was dann aber wirklich verwirrt ist ~(- 2 1)~. Was meinst du was dabei raus kommt? Probier es aus! Warum kommt da also ~1~ raus. Na ja, mit
+    den Infos von oben lesen wir das mal wieder wie der Computer: /Rufe die Funktion ~-~ auf und nimm als Parameter die ~2~ und die ~1~ und
+    liefere das Ergebnis zurück./ In diesem Fall wird als das erste Parameter (hier die ~2~) genommen und das zweite Parameter (die ~1~)
+    abgezogen, also $2 - 1$ berechnet und als Ergebnis zurückgegeben. Das kann schon sehr verwirren.
+
+    Wichtig ist also, hinter der Klammer auf kommt eine *Funktion*. Das Ergebnis dieser Funktion nutzt dann die darauf folgenden Parameter. An
+    die Reihenfolge muß man sich in diesem Fall gewöhnen. Nach einer gewissen Zeit wirst du dich daran aber gewöhnen.
+
+*** Ausblick
+    Um dir mal zu zeigen, wie mächtig Programmieren sein kann, will ich mit dir folgendes Experiment machen. Schreibe nun (einmal) folgende
+    Funktion. Diese Funktion ist kompliziert und muß nicht verstanden werden. Sie soll dir nur einmal zeigen, was mit ein paar Zeilen
+    Programmcode möglich ist, um z.B. deine Mathehausaufgaben zu erleichtern.
+    #+begin_src racket
+      (define (werte-tabelle fn)
+        (for* ([i (range 0 10)])
+          (displayln (format "f(~a) -> ~a" i (fn i)))))
+    #+end_src
+    Wenn du jetzt ~(werte-tabelle verdopple)~ in die Repl eingibst, bekommst du einfach eine Wertetabelle von der Function ~verdopple~
+    ausgegeben.
+    Der Clou ist nun aber, dass funktioniert auch mit anderen Funktionen. Stell dir vor, du must noch eine Wertetabelle für eine weitere
+    Funktion machen, z.B.
+    $$f(x) = 2x - 7$$.
+    Ha, denkst du dir. Die Funktion nennen wir mal ~aufgabe-1~ und schreiben
+    #+begin_src racket
+      (define (aufgabe-1 x)
+        (- (* 2 x) 7))
+    #+end_src
+    Die komische Reihenfolge von ~-~ und ~*~ und auch die Klammerung ist für den richtigen Aufruf der Funktionen notwendig (siehe die Erklärung
+    unter /Reihenfolge/ weiter oben).
+    
+    Aber jetzt kommt die Magie. Jetzt müssen wir nämlich nur noch
+    #+begin_src racket
+      (werte-tabelle aufgabe-1)
+    #+end_src
+    schreiben, und, tatah. Das Ergebnis ist schon
+    da.
+* Libresprite - Figuren
+* Libresprite - Animationen
+* DrRacket - Aninmationen
+  Für das animieren der Figuren oder Gegenstände werden wir uns in dieser Sitzung mit sogenannten Frames, (Bilder-) Rahmen beschäftigen.
+** Animation
+*** Bild-Folgen
+* DrRacket - Spielfeld und Figuren
+  Nun gilt es das Spielfeld mit den Spielfiguren zu kombinieren. Dazu werden die Spielfiguren über das Spielfeld gemalt.
+** Positionen
+** Platzierung
+* DrRacket - Die Welt
+
+** Informationen für das Malen
+   Mit /Welt/ beschreiben wir alle Informationen, die der Computer braucht, um einen Frame, also eine Szene des Spiels zu malen. Du hast
+   bereits viele Informationen verwendet, um die tatsächliche Szene eines Spiels zu malen. 
+*** Welche Infos werden gebraucht
+   Bereits in vorherigen Sessions hast du Koordinaten für die Figuren und Gegenstände genutzt, du hast den Raum beschrieben, in dem du die
+   Kacheln genannt hast, aus denen der Raum aufgebaut ist und du hast für die Animation die Frames durchgezählt, damit der Computer weiß
+   welches Bild gerade gezeichnet werden muß. Jetzt gehen wir genauer darauf ein und sammeln diese Informationen.
+**** Der Raum selbst
+
+     Der Raum selbst verändert sich (bisher) nicht. Daher hast du eine Konstante definiert, in dem du einfach die Liste der Kacheln
+     beschreibst, die dann als Spielfeld (Raum) gemalt werden. Die Positionen der Kacheln hast du nicht direkt angegeben, da sie von oben
+     links nach rechts unten gemalt werden und die Position der einzelnen Kacheln dadurch klar war.
+     Die erste Kachel war auf Position (0,0), die nächste auf (1,0), dann (2,0) bis an das Ende der Spielfeld-Breite. Die nächste Zeile der
+     Kacheln startete dann mit Position (0,1), dann (1,1), (2,1) und so weiter.
+**** Positionen der Gegenstände
+
+     Die Gegenstände hast du in einer weiteren Liste geführt. Hier hast du aber auch noch die Positionen angegeben, wie diese Gegenstände
+     auf dem Spielfeld sein sollen. Auch diese Positionen sind bisher fest. 
+**** Positionen der Figuren
+
+     Die Figuren hast du, ähnlich wie die Gegenstände zunächst in der gleichen Liste gehalten und auch dort mit festen Koordinaten
+     beschrieben. Gerade das wirst du in den nächsten Sessions anpassen, da du die Spielfiguren ja während des Spiels über das Spielfeld
+     bewegen willst.
+**** Frame Nummer
+
+     Für die Animation ist die aktuelle Frame-Nummer wichtig. Aus dieser Zahl ermittelst du welches Bild der Animation gerade angezeigt
+     werden soll.
+*** Wie halte ich diese Infos zusammen
+
+    In Racket werden sogenannten /Strukturen/ verwendet, um mehrere Informationen an einer Stelle zusammen zu halten. Nehmen wir z.B. eine
+    Spielfigur. An einer Spielfigur wollen wir einmal festhalten, welches Bild für diese Figur gemalt werden soll und auch wo sie sich
+    (gerade) auf dem Spielfeld befindet.
+    #+begin_src racket :lang racket
+      (struct figur (kachel position))
+    #+end_src
+    Mit diesem Befehl sagen wir Racket, dass wir eine /Struktur/ mir dem Namen /figur/ beschreiben, die zweit Informationen über die Figur
+    zusammen halten soll, nämlich die zu verwendende Kachel oder auch Bild und die Position auf der diese Figur auf dem Spielbrett
+    erscheinen soll.
+
+    
+* DrRacket - Bewegungen
+* DrRacket - Das Spiel
+** Big Bang
+   Unser Spiel startet mit einem /big bang/.
+* DrRacket - Sounds

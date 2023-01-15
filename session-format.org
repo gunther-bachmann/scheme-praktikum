@@ -1,0 +1,18 @@
+#+title: session-format
+* Überschrift 1
+  Unter einer Überschrift sind wichtige Schritte zusammengefaßt.
+  Sie dienen der Orientierung und geben Aufschluß über den Inhalt.
+
+  Mach dir keine Sorgen, wenn du bestimmte Sachen nicht sofort verstehst. Vieles wird in späteren Sitzungen wiederholt und in praktischen
+  Übungen nochmal aufgegriffen. Wenn du trotzdem Fragen hast, notier sie dir am besten. Wir können dann später über diese Fragen gehen und
+  Anworten dazu gemeinsam finden.
+
+** Überschrift 2
+   - Konzept-ABC :: Benennt und beschreibt ein Konzept, das für diesen Schritt wichtig oder interessant ist.
+** Code der direkt in den Computer eingegeben wird
+   #+begin_src sh
+     # Eingabe in die Shell
+     ls
+   #+end_src
+   Diese Code /Schnipsel/ werden an *geeigneter* Stelle eingegeben. Welches Program / welche Stelle für diesen Code
+   geeignet ist, wird vor dem Code Schnipsel beschrieben (hier: ~Eingabe in die Shell~)
