@@ -1015,12 +1015,368 @@
     #+begin_src racket :lang racket
       (struct figur (kachel position))
     #+end_src
-    Mit diesem Befehl sagen wir Racket, dass wir eine /Struktur/ mir dem Namen /figur/ beschreiben, die zweit Informationen über die Figur
-    zusammen halten soll, nämlich die zu verwendende Kachel oder auch Bild und die Position auf der diese Figur auf dem Spielbrett
-    erscheinen soll.
+    Mit diesem Befehl wird eine /Struktur/ mit dem Namen /figur/ beschrieben, die genau zwei Informationen über die Figur zusammen halten soll,
+    nämlich die zu verwendende Kachel oder auch Bild und die Position auf der diese Figur auf dem Spielbrett erscheinen soll.
 
+    Mit dieser Definition kannst du nun z.B. eine Figur definieren.
+    #+begin_src racket
+      (define magier-figur (figur 'magier (make-posn 5 4)))
+    #+end_src
+    Die ~magier-figur~ wird durch die Kachel ~'magier~ und die position (5,4) beschrieben. Außerdem bekommst du Funktionen zur Verfügung
+    gestellt, mit denen du die verschiedenen Informationen deiner Figur abfragen kannst.
+    Wenn du nun folgendes eingibst:
+    #+begin_src racket
+      (figur-kachel magier-figur)
+    #+end_src
+    Wir dir als Ergebnis ~'magier~ ausgegeben, die Kachel dieser Figur.
+    Was meinst du was ausgegeben wird, wenn du folgendes eingibst:
+    #+begin_src racket
+      (figur-position magier-figur)
+    #+end_src
+    Nun? Hast du das erwartet? Die Ausgabe ~(posn 5 4)~ zeigt, dass deine Magier Figur die Position (5,4) einnimmt.
+
+    Versuch jetzt mal eine eigene Figur zu beschreiben. Z.b. die des Herzogs. *Definiere eine Herzog Figur die auf Position (2,3) ist*.
     
+*** Anpassungen an die ~draw~ Funktion
+
+    Die Figur das Magiers wollen wir nun nicht mehr bei den ~spielelemente~​n haben, sondern als eigenständige Figur haben.
+    #+begin_src racket
+      (define (draw frame)
+        (place-images (append (figur->bild magier-figur frame)
+                              (spielelemente->bilder spielelemente frame))
+                      (appennd (figur-position magier-figur)
+                               (spielelemente->posn spielelemente))
+                      (spielfeld-szene spielfeld start-szene frame)))
+    #+end_src
+    Mit ~append~ erweiterst du die Liste der Bilder. Bisher waren es nur die ~spielelemente~, die du als Bilder in der Spielszene gemalt
+    hast. Jetzt kommt noch das Bild des Magiers dazu. Die Funktion ~figur->bild~ muß noch ergänzt werden, die ist noch nicht vorhanden. Auch
+    die Position des Magiers müssen wir der Liste der Positionen hinzufügen. Die bekommen wir direkt aus der Struktur der ~magier-figur~.
+
+    So nun aber zu der Funktion, die das Bild des Magiers aus der ~magier-figur~ (und dem ~frame~) ermittelt.
+    #+begin_src racket
+      (define (figur->bild die-figur der-frame)
+        (kachel->bild (figur-kachel die-figur) der-frame))
+    #+end_src
+    Mit der Funktion ~figur-kachel~ bekommst du die Kachel deiner Figur und mit der Funktion ~kachel->bild~ schießlich, das Bild zur Kachel.
+*** Die Welt
+
+    Jetzt gilt es alle Informationen, die zum Malen gebraucht werden, in eine /Struktur/ zu packen. Ich gebe dir wieder ein Stück Racket-Code
+    vor, den wir dann zusammen besprechen.
+    #+begin_src racket
+      (struct welt (frame feld elemente figur))
+    #+end_src
+    Die Welt soll also komplett beschrieben werden durch
+    - frame :: die Nummer des aktuellen Bildes im Spiel
+    - feld :: das Spielfeld
+    - elemente :: Gegenstände und weiteres was auf dem Spielfeld erscheinen soll
+    - figur :: die Spielfigur
+
+    Das spiel ist nun so umzustellen, daß zum malen des Spiels nur die Struktur der Welt benutzt wird. Dazu sind ein paar Anpassungen
+    notwendig.
+**** Der Spielstart
+
+     Für den Spielstart ist zu definieren, wie die Welt aussehen soll. Du erstellst also die Welt aus den Komponenten, die wir schon kennen,
+     nur eben jetzt an einer Stelle und zusammen.
+     #+begin_src racket
+       (define start-welt
+         (welt (0 spielfeld spielelemente magier-figur)))
+     #+end_src
+     Damit ist deine Startwelt definiert als eine Welt, die mit Frame 0 startet, das ~spielfeld~ hat, die ~spielelemente~ auf dem Spielfeld
+     anzeigen soll und als Figur die ~magier-figur~ nutzt.
+
+**** Erneute Anpassung der ~draw~ Funktion
+
+     Nun muss schon wieder die ~draw~ Funktion angepasst werden. Sie soll nun nicht mehr allein vom ~frame~ Parameter abhängen, sondern die
+     gesamte Welt als Parameter bekommen. Damit ändert sich die Funktion wie folgt.
+     #+begin_src racket
+       (define (draw die-welt)
+         (define frame (welt-frame die-welt))
+         (define die-figur (welt-figur die-welt))
+         (define das-spielfeld (welt-feld die-welt))
+         (define die-spielelemente (welt-elemente die-welt))
+         (place-images
+          (append (figur->bild die-figur frame)
+                  (spielelemente->bilder die-spielelemente frame))
+          (append (figur-position die-figur)
+                  (spielelemente->posn die-spielelemente))
+          (spielfeld-szene das-spielfeld start-szene frame)))
+     #+end_src
+     Die ganzen ~define ...~ Anweisungen, holen aus der Welt jeweils die unterschiedlichen Werte heraus. Du kannst das mal mit der ~start-welt~
+     direkt selber ausprobieren. *Gebe mal ~(welt-frame start-welt)~ in die Repl ein!*. Damit bekommst du den Frame der ~start-welt~. Und? Kommt
+     das erwartete Ergebnis (0).
+     Wenn du diese ~draw~ Funktion mit der /alten/ vergleichst, fällt auf, daß vor allem die Zeilen mit ~define ...~ dazugekommen sind und dass
+     sich der Name von ein paar Parametern geändert haben. *Schwebe nun mal mit er Maus über diesen neuen Namen!*. DrRacket zeigt dir woher
+     diese Werte kommen!
+**** Anpassung von ~big-bang~
+
+     Nun muß noch der ~big-bang~ angepasst werden.
+     Dazu führen wir noch eine Hilfsfunktion hinzu, die uns in der Welt die Frames hochzählt.
+     #+begin_src racket
+       (define (next-frame die-welt)
+         (struct-copy welt die-welt
+                      [frame (+ 1 (welt-frame die-welt))]))
+     #+end_src
+     Jetzt kann auch die ~big-bang~ Funktion relativ einfach geschrieben werden.
+     #+begin_src racket
+       (big-bang start-welt
+         (on-tick next-frame)
+         (to-draw draw))
+     #+end_src
+     Jetzt kannst du das Programm erneut ausprobieren. Wenn du alles richtig gemacht hast, verhält sich dein Programm nun genauso wie
+     zuvor. Was? "Genauso", wirst du nun sagen. Wieso haben wir denn den ganzen Aufwand betrieben?
+
+     Diese Frage hat sich schon so mancher Programmierer gestellt, der einfach nur das /nächste/ Feature einer Software vorbereitet hat. Die
+     Betonung liegt hier auf vorbereitet. Bevor wir uns daran machen können, die Spielfigur oder später auch Spielfiguren auf dem Spielfeld
+     zu bewegen, mußte das Programm an eben diesen Stellen umgebaut werden. Das sollte gemacht werden, bevor das eigentliche /Feature/ dann
+     endlich eingebaut wird. 
+
 * DrRacket - Bewegungen
+** Bewegung  
+*** Endlich, Figuren bewegen sich
+
+    Nun ist das Programm endlich soweit, dass wir Bewegung einbauen können. Die Figuren sollen sich von einer Kachelposition zur nächsten
+    bewegen können. Dazu schreiben wir eine Funktion ~bewege-figur~. Diese Funktion liefert eine Figur, die um 1 nach links oder rechts
+    verschoben wurde. Wenn wir sie nach links verschieben, wird die Kachel-Koordinate x um eins erniedrigt (also 1 abgezogen). Soll sie sich
+    nach rechts bewegen, wird der Kachel-Koordinate x um eins erhöht (also 1 addiert).    
+    #+begin_src racket
+      (define (bewege-figur die-figur kachel-delta-x)
+        (define figur-pos (figur-position die-figur))
+        (define kachel-koordinaten
+          (posn->kachel-koordinaten figur-pos))
+
+        (define neue-kachel-koordinate-x
+          (+ kachel-delta-x (car kachel-koordinaten)))
+        (define neue-kachel-koordinate-y
+          (cdr kachel-koordinaten))
+        (define neue-position
+          (kachel-koordinaten->posn
+           neue-kachel-koordinate-x
+           neue-kachel-koordinate-y))
+
+          (struct-copy figur die-figur
+                       [position neue-position]))
+    #+end_src
+    Warumm ist diese Funktion nun so lang? Sie teilt sich in drei Teile. Der erste Teil holt die Bildschirmkoordinaten aus der Figur und
+    wandelt sie in Kachelkoordinaten um ~(posn->kachel-koordinaten)~. Das muß gemacht werden, um weiter mit Kachelkoordinaten arbeiten zu
+    können. Die Kachelkoordinaten sind unabhängig von der Kachelgröße und der Skalierung. Das macht es einfacher diese Koordinaten zu
+    verwenden! Der zweite Teil definiert nun die neuen Kachel-Koordinaten der Figur. Dazu wird der alten Kachel-Koordinate-x unser
+    ~kachel-delta-x~ hinzugefügt und die alte Kachel - Koordinate - y einfach übernommen. Im dritten Teil wird die alte Figur genommen und nur die
+    neue Position eingefügt. Der Aufruf der Funktion ~struct-copy~ liest sich dabei wie folgt: ~struct-copy~ soll eine ~figur~ erzeugen, die
+    genauso aussieht wie ~die-figur~, außer dass sie eine neue ~position~ bekommen soll, die den Wert ~neue-position~ hat.
+    
+    Soll nun also der Magier um eins nach rechts bewegt werden, genügt es
+    #+begin_src racket
+      (bewege-figur magier-figur 1)
+    #+end_src
+    zu schreiben. Analog wird der Magier um eins nach links bewegt, wenn du schreibst:
+    #+begin_src racket
+      (bewege-figur magier-figur -1)
+    #+end_src
+*** Bewegung eingeben
+
+    Es gilt deinem Spiel jetzt die Möglichkeit zu geben, eine Eingabe zu machen, sodaß dein Programm auch weiß wann und wie die Figur bewegt
+    werden soll. Dazu müssen Tastatureingaben verarbeitet werden. Folgende Funktion hilft uns dabei.
+    #+begin_src racket
+      (define (tastatur-behandlung die-welt taste)
+        (cond [(key=? taste "left")
+               (struct-copy
+                welt die-welt
+                [figur (bewege-figur (welt-figur die-welt) -1)])]
+              [else die-welt]))
+    #+end_src
+    Diese Funktion erzeugt einen neuen Spielstand, eine neue Welt, in der die Figur um eins nach links bewegt wurde, falls die gedrückte
+    Teste ~"left"~ gedrückt wurde.
+
+*** Bewegung sichtbar machen
+    
+    Nun muß noch der ~big-bang~ angepaßt werden, um die Tastatureingaben an deine Funktion weiterzureichen.
+    #+begin_src racket
+      (big-bang start-welt
+        (on-tick next-frame)
+        (on-key tastatur-behandlung)
+        (to-draw draw))
+    #+end_src
+    *Probier es jetzt mal aus und drücke den Pfeil nach links während das Spiel läuft!* Der Magier läuft. Aber, der läuft ja nur nach links?!
+    Tja, mehr haben wir einfach noch nicht programmiert. Weißt du was für das Laufen nach rechts noch geschrieben werden müsste? *Probier es
+    mal*.
+* DrRacket - Flüssige Bewegung
+** Flüssige Bewegung
+*** Bisherige Bewegung
+
+    Bei der bisherigen Bewegung ist aufgefallen, daß sie alles andere als flüssig verläuft. Die Figur springt quasi von einer Kachel zur
+    nächsten. Das sieht nicht gut aus. Viel schöner wäre es die Bewegung flüssig ablaufen zu lassen. Was muß hierfür gemacht werden.
+
+    Das Zauberwort hier sind mal wieder die /Frames/. 
+*** Frames
+
+    Tatsächlich kann der Rechner keine flüssigen Bewegungen darstellen. Was dem menschlichen Auge als flüssige Bewegung erscheint ist die
+    schnelle Abfolge von Einzelbilder. Die Abfolge ist so schnell, daß das Auge die Folge der Einzelbilder zu einer Bewegung
+    zusammensetzt. Das machen wir uns hier zu Nutze und erzeugen genug aufeinanderfolgende Bilder (Frames), um den Eindruck der flüssigen
+    Bewegung zu erreichen.
+
+    Wir brauchen also Bilder zwischen der Kachel, von der aus die Figur /springt/, bis zu der Kachel, auf der die Figur am Ende /landet/. Die
+    Bildschirm positionen können wir bereits berechnen (sie Funktion ~bewege-figur~). Die alte und die neue Position soll nun mit
+    Zwischenbildern angereicht werden
+*** Flüssige Bewegung
+**** Erstmal nur horizontal 
+    Angenommen die Figur soll sich von Kachelkoordinate (0,0) nach Kachelkoordinate (1,0), also eins nach rechts bewegen. Bei unserer
+    aktuellen Skalierung (3) und Kachel-Breite (16) bedeutet das, daß die Figur sich von Bildschirmkoordinate (0,0) nach (48,0)
+    bewegt. Angenommen wir wollen 8 Bilder (Frames) zeichnen, dann berechnen sich die Zwischenpositionen zu:
+    #+begin_src text
+      (0,0) -> (6,0)  -> (12,0) -> (18,0) -> (24,0)
+            -> (30,0) -> (36,0) -> (42,0) -> (48,0)
+    #+end_src
+    Wenn du gut aufgepaßt hast, ist dir aufgefallen, daß die Anzahl der angegebenen Positionen 9 ist, nicht 8. Das ergibt sich daraus, daß
+    die Startposition auch angegeben ist und die Ziel-x-Koordinate durch 8 geteilt (ergibt 6) jeweils dazuaddiert wurde.
+
+    Der Trick für die Zwischenpositionen ist also, vom Start ausgehend, die Zwischenpositionen zu berechnen und dann nicht sofort die Figur
+    an der Zielposition zu malen, sondern die Figur nach und nach auf allen Zwischenpositionen zu malen.
+
+    Erst definieren wir die Anzahl der Zwischenbild.
+    #+begin_src racket
+      (define animations-frames 8)
+    #+end_src
+
+    Jetzt brauchen wir, abhängig von der aktuellen Frame-Nummer, die Zwischenposition. Diese Funktion ist schon etwas komplizierter, daher
+    werden wir erstmal nur eine Bewegung in x-Richtung (rechts-links) betrachten. Die Bewegung in y-Richtung (oben-unten) betrachten wir
+    später.
+    #+begin_src racket
+      (define (zwischen-position start-position-x
+                                 end-position-x
+                                 frame)
+        (+ start-position-x
+           (/ (* frame
+                 (- end-position-x start-position-x))
+              animations-frames)))
+    #+end_src
+    *Probier jetzt mal aus!* Gebe mal folgendes in die Repl ein:
+    #+begin_src racket
+      (zwischen-position 0 48 0)
+      (zwischen-position 0 48 1)
+      ; ...
+      (zwischen-position 0 48 8)
+    #+end_src
+    Fällt dir was auf? Das sind genau die Zahlen, die wir vorher definiert hatten. Jetzt probier mal andere Startpositionen aus (z.B. von 48
+    nach 0, also eine Bewegung nach links, ~(zwischen-position 48 0 0)~). Jetzt kannst du auch noch mal Bewegungen z.B. von Kachel 1 nach
+    Kachel 2 ausprobieren.
+    #+begin_src racket
+      (zwischen-position 48 96 0)
+      (zwischen-position 48 96 1)
+      ; ...
+      (zwischen-position 48 96 8)
+    #+end_src
+**** Jetzt auch vertikal
+     
+     Bisher war die Bewegung nur von links nach rechts, bzw. rechts nach links. Bewegungen von oben nach unten müssen das Gleiche nun für
+     die y-Koordinate umsetzen. Dazu passen wir die Funktion gemeinsam direkt so an, daß sie beides kann.
+     #+begin_src racket
+       (define (zwischen-position start-position
+                                  end-position
+                                  frame)
+         (define neue-x-position
+           (+ (posn-x start-position)
+              (/ (* frame
+                    (- (posn-x end-position)
+                       (posn-x start-position)))
+                 animations-frames)))
+         (define neue-y-position
+           (+ (posn-y start-position)
+              (/ (* frame
+                    (- (posn-y end-position)
+                       (posn-y start-position)))
+                 animations-frames)))
+         (make-posn neue-x-position neue-y-position))
+     #+end_src
+     Wenn du dir die Funktion anschaust wirst du viele Gemeinsamkeiten mit unserem Code finden, der nur für die horizontale Bewegung
+     geschrieben wurde. Auch ist die Berechnung der ~neue-y-position~, der der ~neue-x-position~ sehr ähnlich.
+**** Darstellen der Zwischenpositionen
+
+     Jetzt gilt es die Zwischenpositionen darzustellen. Dazu erweitern wir die Struktur der Figur um Informationen, die wir für die
+     Darstellung der flüssigen Bewegung brauchen. Bisher hat es gereicht einfach nur die aktuelle Position der Figur zu merken. Jetzt
+     brauchen wir (für die Berechnung der Zwischenposition) die Start- und die Zielposition, sowie eine Framezahl, die angibt, wie weit die
+     Figur bereits /gewandert/ ist.
+     #+begin_src racket
+       (struct figur
+         (kachel start-position end-position start-frame))
+     #+end_src
+     Jetzt muß die Magier Figur natürlich auch angepaßt werden.
+     #+begin_src racket
+       (define magier-figur
+         (figur 'magier (make-posn 5 4) (make-posn 5 4) 0))
+     #+end_src
+     Auch das Malen der Figur muß nun angepaßt werden.
+     #+begin_src racket
+       (define (draw die-welt)
+         (define frame (welt-frame die-welt))
+         (define die-figur (welt-figur die-welt))
+         (define das-spielfeld (welt-feld die-welt))
+         (define die-spielelemente (welt-elemente die-welt))
+         (place-images
+          (append (figur->bild die-figur frame)
+                  (spielelemente->bilder die-spielelemente frame))
+          (append (figur-zwischen-position die-figur frame)
+                  (spielelemente->posn die-spielelemente))
+          (spielfeld-szene das-spielfeld start-szene frame)))
+     #+end_src
+     Dir ist bestimmt aufgefallen, daß hier eine neue Funktion dazugekommen ist, ~figur-zwischen-position~, die die Zwischenposition der Figur
+     berechnet.
+     #+begin_src racket
+       (define (figur-zwischen-position die-figur frame)
+         (zwischen-position
+          (figur-start-position die-figur)
+          (figur-end-position die-figur)
+          (- frame (figur-start-frame die-figur))))
+     #+end_src
+     Diese Funktion soll aber nur dann Zwischenpositionen ausgeben, wenn die Figur noch auf dem Weg zu ihrer end-position ist. Wann ist das
+     def Fall? Die Figur hat ihre Endposition erreicht, wenn
+     $$\text{frame} \ge \text{start-frame} + \text{animations-frames}$$
+     Wenn also schon alle Zwischenpositionen angezeigt wurden (also animations-frames viele), dann kann einfach die end-position verwendet
+     werden.
+     #+begin_src racket
+       (define (figur-zwischen-position die-figur frame)
+         (if (>= frame
+                (+ figur-start-frame annimations-frames))
+             (figur-end-position die-figur)
+             (zwischen-position
+              (figur-start-position die-figur)
+              (figur-end-position die-figur)
+              (- frame (figur-start-frame die-figur)))))
+     #+end_src
+     Jetzt gilt es auch noch die Funktion anzupassen, die eine Figur bewegt.
+     #+begin_src racket
+       (define (bewege-figur die-figur kachel-delta-x frame)
+         (define figur-pos (figur-end-position die-figur))
+         (define kachel-koordinaten
+           (posn->kachel-koordinaten figur-pos))
+
+         (define neue-kachel-koordinate-x
+           (+ kachel-delta-x (car kachel-koordinaten)))
+         (define neue-kachel-koordinate-y
+           (cdr kachel-koordinaten))
+         (define neue-position
+           (kachel-koordinaten->posn
+            neue-kachel-koordinate-x
+            neue-kachel-koordinate-y))
+
+           (struct-copy figur die-figur
+                        [start-position figur-pos
+                         end-position   neue-position
+                         start-frame    frame]))
+     #+end_src
+     Du siehst der Aufruf hat sich nun um das Parameter ~frame~ erweitert, der den Anfang der Bewegung markiert. Dieses Parameter muß beim
+     Aufruf in der Funktion ~tastatur-behandlung~ nun noch ergänzt werden.
+     #+begin_src racket
+       (define (tastatur-behandlung die-welt taste)
+         (cond [(key=? taste "left")
+                (struct-copy
+                 welt die-welt
+                 [figur (bewege-figur (welt-figur die-welt)
+                                      -1
+                                      (welt-frame die-welt))])]
+               [else die-welt]))
+     #+end_src
+     Nun sollten wir aber soweit sein und du kannst dein Programm erneut starten. *Bewege nun die Figur nach links!*. Wie sieht es aus?
+     Wandert die Figur wie du es erwartest? 
 * DrRacket - Das Spiel
 ** Big Bang
    Unser Spiel startet mit einem /big bang/.

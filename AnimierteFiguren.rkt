@@ -219,7 +219,7 @@
         [(key=? key-event "down") (struct-copy world a-world [figure (moving-figure (world-figure a-world) 0 1 (world-frame a-world))])]
         [else a-world]))
 
-(big-bang (world 0 (figure (kachel-koordinaten->posn 5 3) 0 (kachel-koordinaten->posn 5 3)) (list)(list))
-  (on-tick (lambda (gerade) (struct-copy world gerade [frame (+ 1 (world-frame gerade))])))
-  (on-key tastatur-behandlung)
-  (to-draw draw))
+;; (big-bang (world 0 (figure (kachel-koordinaten->posn 5 3) 0 (kachel-koordinaten->posn 5 3)) (list)(list))
+;;   (on-tick (lambda (gerade) (struct-copy world gerade [frame (+ 1 (world-frame gerade))])))
+;;   (on-key tastatur-behandlung)
+;;   (to-draw draw))

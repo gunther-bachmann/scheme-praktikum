@@ -188,9 +188,9 @@
                    (make-pairs (filter (lambda (element) (number? element)) elemente))))
 
 (define (draw frame)
-(place-images (spielelemente->bilder spielelemente frame)
-              (spielelemente->posn spielelemente)
-              (spielfeld-szene spielfeld start-szene frame)))
+  (place-images (spielelemente->bilder spielelemente frame)
+                (spielelemente->posn spielelemente)
+                (spielfeld-szene spielfeld start-szene frame)))
 
 (big-bang 0
   (on-tick (lambda (n) (+ 1 n)))
