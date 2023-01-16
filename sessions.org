@@ -1381,3 +1381,7 @@
 ** Big Bang
    Unser Spiel startet mit einem /big bang/.
 * DrRacket - Sounds
+  #+begin_src racket
+    (require racket/system)
+    (process "mpg123 ~/media/it_crowd.mp3") ; async call to player
+  #+end_src
