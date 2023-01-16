@@ -1132,7 +1132,7 @@
 
 * DrRacket - Bewegungen
 ** Bewegung  
-*** Endlich, Figuren bewegen sich
+*** Figuren bewegen
 
     Nun ist das Programm endlich soweit, dass wir Bewegung einbauen können. Die Figuren sollen sich von einer Kachelposition zur nächsten
     bewegen können. Dazu schreiben wir eine Funktion ~bewege-figur~. Diese Funktion liefert eine Figur, die um 1 nach links oder rechts
@@ -1172,7 +1172,7 @@
     #+begin_src racket
       (bewege-figur magier-figur -1)
     #+end_src
-*** Bewegung eingeben
+*** Bewegung auslösen
 
     Es gilt deinem Spiel jetzt die Möglichkeit zu geben, eine Eingabe zu machen, sodaß dein Programm auch weiß wann und wie die Figur bewegt
     werden soll. Dazu müssen Tastatureingaben verarbeitet werden. Folgende Funktion hilft uns dabei.
@@ -1204,14 +1204,14 @@
 *** Bisherige Bewegung
 
     Bei der bisherigen Bewegung ist aufgefallen, daß sie alles andere als flüssig verläuft. Die Figur springt quasi von einer Kachel zur
-    nächsten. Das sieht nicht gut aus. Viel schöner wäre es die Bewegung flüssig ablaufen zu lassen. Was muß hierfür gemacht werden.
+    nächsten. Das sieht nicht gut aus. Viel schöner wäre es die Bewegung flüssig ablaufen zu lassen. Was muß hierfür gemacht werden?
 
     Das Zauberwort hier sind mal wieder die /Frames/. 
 *** Frames
 
     Tatsächlich kann der Rechner keine flüssigen Bewegungen darstellen. Was dem menschlichen Auge als flüssige Bewegung erscheint ist die
     schnelle Abfolge von Einzelbilder. Die Abfolge ist so schnell, daß das Auge die Folge der Einzelbilder zu einer Bewegung
-    zusammensetzt. Das machen wir uns hier zu Nutze und erzeugen genug aufeinanderfolgende Bilder (Frames), um den Eindruck der flüssigen
+    zusammensetzt. Das machen wir uns hier zunutze und erzeugen genug aufeinanderfolgende Bilder (Frames), um den Eindruck der flüssigen
     Bewegung zu erreichen.
 
     Wir brauchen also Bilder zwischen der Kachel, von der aus die Figur /springt/, bis zu der Kachel, auf der die Figur am Ende /landet/. Die
@@ -1226,8 +1226,8 @@
       (0,0) -> (6,0)  -> (12,0) -> (18,0) -> (24,0)
             -> (30,0) -> (36,0) -> (42,0) -> (48,0)
     #+end_src
-    Wenn du gut aufgepaßt hast, ist dir aufgefallen, daß die Anzahl der angegebenen Positionen 9 ist, nicht 8. Das ergibt sich daraus, daß
-    die Startposition auch angegeben ist und die Ziel-x-Koordinate durch 8 geteilt (ergibt 6) jeweils dazuaddiert wurde.
+    Vielleicht ist dir aufgefallen, daß die Anzahl der angegebenen Positionen 9 ist, nicht 8. Das ergibt sich daraus, daß die Startposition
+    auch angegeben ist und die Ziel-x-Koordinate durch 8 geteilt (ergibt 6) jeweils dazuaddiert wurde.
 
     Der Trick für die Zwischenpositionen ist also, vom Start ausgehend, die Zwischenpositionen zu berechnen und dann nicht sofort die Figur
     an der Zielposition zu malen, sondern die Figur nach und nach auf allen Zwischenpositionen zu malen.
