@@ -1020,7 +1020,7 @@
 
     Mit dieser Definition kannst du nun z.B. eine Figur definieren.
     #+begin_src racket
-      (define magier-figur (figur 'magier (make-posn 5 4)))
+      (define magier-figur (figur 'magier (kachel-koordinaten->posn 5 4)))
     #+end_src
     Die ~magier-figur~ wird durch die Kachel ~'magier~ und die position (5,4) beschrieben. Außerdem bekommst du Funktionen zur Verfügung
     gestellt, mit denen du die verschiedenen Informationen deiner Figur abfragen kannst.
@@ -1042,10 +1042,10 @@
     Die Figur das Magiers wollen wir nun nicht mehr bei den ~spielelemente~​n haben, sondern als eigenständige Figur haben.
     #+begin_src racket
       (define (draw frame)
-        (place-images (append (figur->bild magier-figur frame)
+        (place-images (append (list (figur->bild magier-figur frame))
                               (spielelemente->bilder spielelemente frame))
-                      (appennd (figur-position magier-figur)
-                               (spielelemente->posn spielelemente))
+                      (append (list (figur-position magier-figur))
+                              (spielelemente->posn spielelemente))
                       (spielfeld-szene spielfeld start-szene frame)))
     #+end_src
     Mit ~append~ erweiterst du die Liste der Bilder. Bisher waren es nur die ~spielelemente~, die du als Bilder in der Spielszene gemalt
@@ -1079,7 +1079,7 @@
      nur eben jetzt an einer Stelle und zusammen.
      #+begin_src racket
        (define start-welt
-         (welt (0 spielfeld spielelemente magier-figur)))
+         (welt 0 spielfeld spielelemente magier-figur))
      #+end_src
      Damit ist deine Startwelt definiert als eine Welt, die mit Frame 0 startet, das ~spielfeld~ hat, die ~spielelemente~ auf dem Spielfeld
      anzeigen soll und als Figur die ~magier-figur~ nutzt.
@@ -1095,9 +1095,9 @@
          (define das-spielfeld (welt-feld die-welt))
          (define die-spielelemente (welt-elemente die-welt))
          (place-images
-          (append (figur->bild die-figur frame)
+          (append (list (figur->bild die-figur frame))
                   (spielelemente->bilder die-spielelemente frame))
-          (append (figur-position die-figur)
+          (append (list (figur-position die-figur))
                   (spielelemente->posn die-spielelemente))
           (spielfeld-szene das-spielfeld start-szene frame)))
      #+end_src
@@ -1302,7 +1302,10 @@
      Jetzt muß die Magier Figur natürlich auch angepaßt werden.
      #+begin_src racket
        (define magier-figur
-         (figur 'magier (make-posn 5 4) (make-posn 5 4) 0))
+         (figur 'magier
+                (kachel-koordinaten->posn 5 4)
+                (kachel-koordinaten->posn 5 4)
+                0))
      #+end_src
      Auch das Malen der Figur muß nun angepaßt werden.
      #+begin_src racket
@@ -1312,9 +1315,9 @@
          (define das-spielfeld (welt-feld die-welt))
          (define die-spielelemente (welt-elemente die-welt))
          (place-images
-          (append (figur->bild die-figur frame)
+          (append (list (figur->bild die-figur frame))
                   (spielelemente->bilder die-spielelemente frame))
-          (append (figur-zwischen-position die-figur frame)
+          (append (list (figur-zwischen-position die-figur frame))
                   (spielelemente->posn die-spielelemente))
           (spielfeld-szene das-spielfeld start-szene frame)))
      #+end_src
