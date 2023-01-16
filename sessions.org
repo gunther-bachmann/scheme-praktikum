@@ -1132,6 +1132,13 @@
 
 * DrRacket - Bewegungen
 ** Bewegung  
+*** Bildschirm Koordinaten / Kachel Koordinaten
+
+    Immer wieder haben wir das Thema, dass Kachelkoordinaten, also Koordinaten mit denen wir die Position von Figuren, Spielelementen und
+    Hintergrundkacheln auf dem Spielfeld, umrechnen müssen. Und zwar in Bildschirmkoordinaten, denn, der Computer kann nur etwas mit
+    Bildschirmkoordinaten anfangen. Die Kachelkoordinaten waren unsere Idee und sind auch extrem nützlich, müssen aber für die
+    Positionierung in Bildschirmkoordinaten umgerechnet werden.
+
 *** Figuren bewegen
 
     Nun ist das Programm endlich soweit, dass wir Bewegung einbauen können. Die Figuren sollen sich von einer Kachelposition zur nächsten
@@ -1156,7 +1163,7 @@
           (struct-copy figur die-figur
                        [position neue-position]))
     #+end_src
-    Warumm ist diese Funktion nun so lang? Sie teilt sich in drei Teile. Der erste Teil holt die Bildschirmkoordinaten aus der Figur und
+    Warum ist diese Funktion nun so lang? Sie teilt sich in drei Teile. Der erste Teil holt die Bildschirmkoordinaten aus der Figur und
     wandelt sie in Kachelkoordinaten um ~(posn->kachel-koordinaten)~. Das muß gemacht werden, um weiter mit Kachelkoordinaten arbeiten zu
     können. Die Kachelkoordinaten sind unabhängig von der Kachelgröße und der Skalierung. Das macht es einfacher diese Koordinaten zu
     verwenden! Der zweite Teil definiert nun die neuen Kachel-Koordinaten der Figur. Dazu wird der alten Kachel-Koordinate-x unser
@@ -1199,6 +1206,245 @@
     *Probier es jetzt mal aus und drücke den Pfeil nach links während das Spiel läuft!* Der Magier läuft. Aber, der läuft ja nur nach links?!
     Tja, mehr haben wir einfach noch nicht programmiert. Weißt du was für das Laufen nach rechts noch geschrieben werden müsste? *Probier es
     mal*.
+* DrRacket - Inventory
+** Inventory
+   Unsere Figur möchte nun Gegenstände aufheben und in ein Inventory stecken. Mit diesen aufgenommenen Gegenständen ist unsere Figur dann
+   auch in der Lage verschiedene Interaktionen mit dem Spielfeld bzw. auch anderen Figuren oder Gegenständen zu realisieren (z.B. Türen
+   öffnen, Monster angreifen etc.).
+*** Inventory
+
+    Das Inventory werden wir unserer Figur hinzufügen, d.h. die Struktur ~figur~ ist anzupassen. Im Inventory sollen eine Liste von
+    Gegenständen aufgenommen werden können.
+    #+begin_src racket
+      (struct inventory (gegenstände))
+      (struct gegenstand (kachel))
+    #+end_src
+    Diese Strukturen können dann später noch erweitert werden (z.B. Gewicht, Größe, nutzbar in der Hand oder auf dem Kopf ...).
+
+    Ein einfaches Start-Inventory könnte nun z.B. eine Goldmünze und ein Schwert sein. *Zeichne via libresprite diese Gegenstände wieder als
+    16x16 Bild!* Binde diese Gegenstände in dein Programm ein. Ergänze die Function ~kachel->bild~, um diese Gegenstände zu malen. Füge
+    folgendes Start-Inventory in dein Programm ein:
+    #+begin_src racket
+      (define start-inventory
+        (inventory (list (gegenstand 'gold-münze)
+                         (gegenstand 'schwert))))
+    #+end_src
+    Unsere Figur wird nun noch um ~inventory~ ergänzt und unser ~magier-figur~ entsprechend um das ~start-inventory~ ergänzt.
+    #+begin_src racket
+      (struct figur (kachel position inventory))
+      (define magier-figur
+        (figur 'magier
+               (kachel-koordinaten->posn 4 3)
+               start-inventory))
+    #+end_src
+*** Das Malen
+
+    Jetzt entscheiden wir, wie das Inventory gemalt werden soll. Eine einfache Möglichkeit ist das Inventory als Kacheln auf grauem
+    Hintergrund zu malen. D.h. Die Ausrüstungsgegenstände werden einfach, wie Kacheln auf einem z.B. 3x3 großen grauem Feld gemalt.
+    Eine Funktion passen wir für diesen Zweck noch an.
+    #+begin_src racket
+      (define (kachel->posn breite höhe)
+        (map (lambda (number)
+               (kachel-koordinaten->posn
+                (modulo number breite)
+                (quotient number höhe)))
+             (range 0 (* breite höhe))))
+    #+end_src
+    Jetzt noch eine kleine Anpassung an unserem Spielfeld.
+    #+begin_src racket
+      (define (spielfeld-szene das-spielfeld die-szene)
+        (place-images (map kachel->bild das-spielfeld)
+                      (kachel->posn SPIELFELD-BREITE SPIELFELD-HÖHE)
+                      die-szene))
+
+    #+end_src
+    Jetzt noch die Größe des Inventory festlegen.
+    #+begin_src racket
+      (define INVENTORY-BREITE 3)
+      (define INVENTORY-HÖHE 3)
+    #+end_src
+    Nun das leere Inventory 
+    #+begin_src racket
+      (define empty-inventory
+        (empty-scene (* SKALIERUNG INVENTORY-BREITE KACHEL-BREITE)
+                     (* SKALIERUNG INVENTORY-HÖHE KACHEL-HÖHE)
+                     "gray"))
+    #+end_src
+    Nun noch eine kleine Hilfsfunktion, die uns die Gegenstände in Bilder umwandelt.
+    #+begin_src racket
+      (define (gegenstände->bilder die-gegenstände)
+        (map (lambda (gegenstand)
+               (kachel->bild (gegenstand-kachel gegenstand) frame)
+               die-gegenstände)))
+    #+end_src
+    Jetzt noch das Inventory mit den Gegenständen füllen.
+    #+begin_src racket
+      (define (draw-inventory das-inventory frame)
+        (place-images
+         (map (lambda (bild) (scale SKALIERUNG bild))
+              (gegenstände->bilder 
+               (inventory-gegenstände das-inventory))
+              (kachel->posn INVENTORY-BREITE INVENTORY-HÖHE)
+              empty-inventory)))
+    #+end_src
+    Jetzt kannst du endlich das Inventory malen. *Gib folgendes in der Repl ein!*
+    #+begin_src racket
+      (draw-inventory start-inventory 0)
+    #+end_src
+*** Das Inventory anzeigen/ausblenden
+
+    Jetzt wollen wird das Inventory während des Spiels einblenden (am besten in der Mitte). Was ist die Mitte?
+    Die Mitte des Spielfeldes ist die Breite des Spielfeldes geteilt durch 2 (in x-Richtung) und die Höhe des Spielfeldes geteilt durch 2
+    (in der y-Richtung).
+
+    In der Welt Struktur müssen wir jetzt auch noch irgendwie hinterlegen, daß das Inventory angezeigt werden soll und solange das Inventory
+    gezeigt wird z.B. keine Bewegung deiner Figur möglich ist.
+
+    Dazu führen wir verschiedene Spielzustände ein. Ein Zustand, den wir bisher immer genutzt haben, nennen wir nun ~'abenteuer~, wenn wir uns
+    das Inventory ansehen nennen wir unseren Spielzustand ~'inventory~.
+
+    Nun können wir definieren, daß Bewegung z.B. nur möglich ist, wenn wir im Spielzustand ~'abenteuer~ sind. Gesagt getan.
+    #+begin_src racket
+      (struct welt (frame feld elemente figur inventar zustand))
+    #+end_src
+    Die Startwelt sieht dann mit Inventory so aus:
+     #+begin_src racket
+       (define start-welt
+         (welt 0 spielfeld spielelemente
+               magier-figur start-inventory 'abenteuer))
+     #+end_src
+    Außerdem gilt es die tastatur-eingabe so anzupassen, dass der aktuelle Spielzustand berücksichtigt wird. Mit ~'i'~ komme ich in das
+    Inventory, mit dem gleichen Buchstaben wieder in den Abenteuer-Modus. Nur im Abenteuer-Modus kann ich die Figur bewegen.
+    #+begin_src racket
+      (define (tastatur-behandlung die-welt taste)
+        (cond [(and (eq? (welt-zustand die-welt) 'abenteuer)
+                  (key=? taste "left"))
+               (struct-copy
+                welt die-welt
+                [figur (bewege-figur (welt-figur die-welt)
+                                     -1
+                                     (welt-frame die-welt))])]
+              [(and (eq? (welt-zustand die-welt) 'abenteuer)
+                  (key=? taste "i"))
+               (struct-copy welt die-welt
+                            [zustand 'inventory])]
+              [(and (eq? (welt-zustand die-welt) 'inventory)
+                  (key=? taste "i"))
+               (struct-copy welt die-welt
+                            [zustand 'abenteuer])]        
+              [else die-welt]))
+    #+end_src
+    Die Position des Inventory soll mittig sein
+    #+begin_src racket
+      (define (inventory-posn)
+        (make-posn
+         (/ (* SKALLIERUNG KACHEL-BREITE SPIELFELD-BREITE) 2)
+         (/ (* SKALLIERUNG KACHEL-HÖHE SPIELFELD-HÖHE) 2)))
+    #+end_src
+    Jetzt noch die ~draw~ Funktion so anpassen, daß im Spielzustand ~'inventory~ das Inventory über das Spiel gemalt wird.
+    #+begin_src racket
+      (define (draw die-welt)
+        (define frame (welt-frame die-welt))
+        (define die-figur (welt-figur die-welt))
+        (define das-spielfeld (welt-feld die-welt))
+        (define die-spielelemente (welt-elemente die-welt))
+        (place-images
+         (append
+          (list (draw-inventory (welt-inventory die-welt) frame)
+                (figur->bild die-figur frame))
+          (spielelemente->bilder die-spielelemente frame))
+         (append
+          (list (inventory-posn)
+                (figur-zwischen-position die-figur frame))
+          (spielelemente->posn die-spielelemente))
+         (spielfeld-szene das-spielfeld start-szene frame)))
+    #+end_src
+*** Und jetzt den Code /aufräumen/
+
+    Eine Möglichkeit, den Code übersichtlicher zu machen, ist es, Gemeinsamkeiten sinnvolle Namen zu geben und zusammen zu fassen. Das
+    klingt einfach, ist aber sehr, sehr schwierig. Besonders die Namensgebung bereitet selbst erfahrenen Entwicklern immer wieder Probleme.
+
+    Nehmen wir z.B. die Funktion ~tastatur-behandlung~. Bei jeder Taste immer zu schreiben, welcher Zustand der Welt dabei relevant ist, wirkt
+    unüberschaubar. Dieser wiederkehrende, sich wiederholende Code soll zusammengefaßt werden und einen sinnvollen Namen bekommen.
+    
+    Erster Versuch
+    #+begin_src racket
+      (define (abenteuer? die-welt)
+        (eq? (welt-zustand die-welt) 'abenteuer))
+    #+end_src
+    ermöglicht die Vereinfachung der Funktion ~tastatur-behandlung~ auf:
+    #+begin_src racket
+      (define (tastatur-behandlung die-welt taste)
+        (cond [(and (abenteuer? die-welt)
+                  (key=? taste "left"))
+               ; ...
+               ]
+              [(and (abenteuer? die-welt)
+                  (key=? taste "i"))
+               ; ...
+               ]
+              [(and (eq? (welt-zustand die-welt) 'inventory)
+                  (key=? taste "i"))
+               ; ...
+               ]        
+              [else die-welt]))
+    #+end_src
+    Nächster Versuch
+    #+begin_src racket
+      (define (taste-in? taste taste-erwartet zustand die-welt)
+        (and (eq? (welt-zustand die-welt) zustand)
+           (key=? taste taste-erwartet)))
+    #+end_src
+    ermöglicht die Vereinfachung der Funktion ~tastatur-behandlung~ auf:
+    #+begin_src racket
+      (define (tastatur-behandlung die-welt taste)
+        (cond [(taste-in? taste "left" 'abenteuer die-welt)
+               ; ...
+               ]
+              [(taste-in? taste "i" 'abenteuer die-welt)
+               ; ...
+               ]
+              [(taste-in? taste "i" 'inventory die-welt)
+               ; ...
+               ]        
+              [else die-welt]))
+    #+end_src
+    Ist der Name noch selbstbeschreibend und drückt aus, was die Funktion wirklich macht? Schwierig zu beantworten, oder?  Wenn man das in
+    eine lokale Funktion umwandelt wird es übersichtlicher. Die Funktion kann dann außerhalb von ~tastatur-eingabe~ gar nicht (falsch)
+    verwendet werden.
+    #+begin_src racket
+      (define (tastatur-behandlung die-welt taste)
+        (define (taste-in? taste-erwartet zustand)
+          (and (eq? (welt-zustand die-welt) zustand)
+             (key=? taste taste-erwartet)))
+        (cond [(taste-in? "left" 'abenteuer)
+               ; ...
+               ]
+              [(taste-in? "i" 'abenteuer)
+               ; ...
+               ]
+              [(taste-in?  "i" 'inventory)
+               ; ...
+               ]        
+              [else die-welt]))
+    #+end_src
+    Was ist nun eine lokale Funktion? Die Funktion ~taste-in?~ ist nur innerhalb von ~tastatur-behandlung~ nutzbar. Das mag erstmal wie ein
+    Nachteil erscheinen, kann aber eben für Funktionen Sinn machen, die an anderen Stellen gar nicht so einfach verwendet werden könnten.
+    Ein großer Vorteil dieser lokalen Funktion ist nun, daß sie Parameter von ~tastatur-behandlung~ nutzen kann und diese nicht jedesmal
+    (wiederholt) mitgeteilt bekommen muß. Daher verkürzt sich in unserem Beispiel der Aufruf
+    #+begin_src racket
+      (taste-in? taste "left" 'abenteuer die-welt)
+    #+end_src
+    auf
+    #+begin_src racket
+      (taste-in? "left" 'abenteuer)
+    #+end_src
+    Die Funktion ~taste-in?~ kann trotzdem ~die-welt~ und ~taste~ verwenden, da dies Parameter der Funktion ~tastatur-behandlung~ sind. Das macht
+    die Verwendung deutlich kürzer und das Program dadurch lesbarer.
+
+    Diese und ähnliche Vereinfachungen sind oft anwendbar und machen das Programm insgesamt kürzer, übersichtlicher und
+    lesbarer. Insbesondere du Features deinen Programm hinzugefügt hast, ist immer ein guter Zeitpunkt, um zu prüfen, ob du dein Programm
+    nicht übersichtlicher gestalten kannst. Es lohnt sich!
 * DrRacket - Flüssige Bewegung
 ** Flüssige Bewegung
 *** Bisherige Bewegung
@@ -1380,6 +1626,7 @@
      #+end_src
      Nun sollten wir aber soweit sein und du kannst dein Programm erneut starten. *Bewege nun die Figur nach links!*. Wie sieht es aus?
      Wandert die Figur wie du es erwartest? 
+* DrRacket - Interaktion
 * DrRacket - Das Spiel
 ** Big Bang
    Unser Spiel startet mit einem /big bang/.
