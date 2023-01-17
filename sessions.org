@@ -1626,7 +1626,131 @@
      #+end_src
      Nun sollten wir aber soweit sein und du kannst dein Programm erneut starten. *Bewege nun die Figur nach links!*. Wie sieht es aus?
      Wandert die Figur wie du es erwartest? 
-* DrRacket - Interaktion
+* DrRacket - Interaktionen
+** Interaktionen
+*** Spielfeld Interaktionen
+    Die nun folgende Liste von möglichen Interaktionen ist bei weitem nicht vollständig. Wir können Sie aber als Startpunkt für unsere
+    Überlegungen bei der Programmanpassung nutzen. Einige der Interaktionen gleichen sich und werden im Code vermutlich dann auch ähnlich
+    behandelt werden können.
+**** Blockierende Felder
+     Wände sollten die Bewegung deiner Figur blockieren.
+**** Bedingt blockierende Felder
+     Türen können blockieren, wenn der richtige Schlüssel in deinem Inventory ist, sollte sie aber vielleicht automatisch aufgehen.
+**** Verändern von Feldern
+     Geschlossene Türen könnten auch durch dein Einsatz eines Schlüssels in offene Türen transformiert werden. Das würde eine Anpassung des
+     Spielfeldes bedeuten.
+*** Spielelement Interaktionen
+**** Blockierende Spielelemente
+     Es mag Spielelemente geben (wie z.B. eine schwere Schatzkiste) die den Weg deiner Figur blockieren.
+**** Verschieben von Spielelementen
+     Einige Spielelemente mögen wiederum so /leicht/ sein, daß sie automatisch verschoben werden, wenn die Figur dagegen läuft. Das würde
+     z.B. das Verschieben eines Stuhls ermöglichen, der wiederum eine Hilfe beim Erklimmen eines anderen Spielelements helfen könnte.
+**** Verändern von Spielelementen
+     Auch Spielelemente können sich durch eine Interaktion mit der Figur verändern (z.B. eine Kiste könnte geöffnet werden, eine Flasche
+     ausgetrunken, ein Stuhl zerschlagen etc.).
+**** Aufnehmen von Spielelementen
+     Spielelemente die klein und leicht genug sind, kann eine Figur in sein Inventory aufnehmen (z.B. seinem Rucksack).
+*** Figur Interaktionen
+**** Blockierende Figuren
+     Manche Figuren weichen einfach nicht aus und blockieren so deine Figur.
+**** Figuren weichen aus
+     Andere Figuren weichen womöglich aus wenn du kommst. Wohin ist dann wohl eher Zufall.
+**** Sprechen mit anderen Figuren
+     Wenn du in der Nähe einer anderen Figur bist, kannst du mit dieser Figur womöglich reden und etwas interessantes erfahren.
+**** Kämpfen mit Figuren
+     Wenn du auf ein gefährliches Monster triffst magst du sogar bereit sein gegen es zu kämpfen (z.B. wenn du angegriffen wirst).
+*** Wann findet Interaktion statt?
+    Als erstes gilt es tatsächlich zu entscheiden, wann eine Interaktion überhaupt stattfindet. Bei einer Bewegung ist es z.B. der
+    Bewegungswunsch, d.h. wenn deine Figur nach links gehen will, müssen wir prüfen, darf die Figur überhaupt nach links, oder blockiert da
+    vielleicht eine Wand den Weg deiner Figur. Dazu müssen wir ersteinmal ermitteln, was alles links von deiner Figur ist.
+    Das Ergebnis kann eine ganze Liste von Dingen sein. Wir beschränken die Anzahl der möglichen Dinge nun auf genau 2. Vielleicht ändern
+    wir diese Enscheidung später, aber jetzt legen wir fest: Auf einem Feld deines Spielfeldes, auf das deine Figur gehen will kann
+    höchstens folgende zwei Dinge enthalten.
+    1. die Spielfeld-Kachel
+    2. ein Gegenstand oder eine Figur
+    Wir schreiben uns also erstmal eine Funktion, die uns zu einem Feld genau diese zwei Dinge zurückliefert. Ist kein Gegenstand oder Figur
+    auf einem Feld, liefert die Funktion eben nur die Spielfeld-Kachel. Vorher aber sind noch ein paar Aufräumarbeiten notwendig.
+
+    Damit wir Spielelemente nun leicht wiederfinden, werden wir eine Struktur definieren, was Spielelemente eben ausmachen soll.
+    #+begin_src racket
+      (struct spielelement (kachel position))
+    #+end_src
+    Damit müssen wir wieder einige Anpassungen oder auch Vereinfachungen an unserem Programm vornehmen.
+    #+begin_src racket
+      (define spielelemente
+        (list
+         (spielelement 'schatz.90 (kachel-koordinaten->posn 6 3))
+         (spielelement 'schatz.270 (kachel-koordinaten->posn 1 1))
+         (spielelement 'magier (kachel-koordinaten->posn 5 3))))
+    #+end_src
+    Das vereinfacht nun auch das Malen der ~spielelemente~. In der ~draw~ Funktion sind die Bilder der spielemente und deren Position nun durch
+    folgende Listen ermittelbar:
+    #+begin_src racket
+      (kachel->bild (map spielelement-kachel die-spielelemente) frame)
+      (map spielelement-position die-spielelemente)
+    #+end_src
+    Jetzt schreiben wir endlich die Funktion, die uns ermittelt, was sich so alles auf Kachel Position x,y befindet.
+    #+begin_src racket
+      (define (spielfeld-kachel die-welt kachel-x kachel-y)
+        (list-ref (welt-feld die-welt)
+                  (+ kachel-x (* kachel-y SPIELFELD-BREITE))))
+
+      (define (spielelemente-auf die-welt kachel-x kachel-y)
+        (filter
+         (lambda (das-element)
+           (define pos (posn->kachel-koordinaten
+                        (spielelement-position das-element)))
+           (and (eq? (car pos) kachel-x)
+              (eq? (cdr pos) kachel-y)))
+         (welt-elemente die-welt)))
+    #+end_src
+    Sobald wir wissen was da ist, können wir nun entscheidungen treffen, ob die gewünschte Aktion auch wirklich funktioniert oder
+    nicht. Erstmal implementieren wir blockierende Felder und Elemente.
+    #+begin_src racket
+      (define (feld-blockiert-nicht? die-welt feld)
+        (memq feld (list 'boden 'holzboden)))
+      (define (element-blockiert-nicht? die-welt element)
+        (memq element (list 'flasche 'topf)))
+    #+end_src
+    Jetzt können wir für eine Aktion ermittlen, ob diese Aktion (in unserem Fall z.B. ~'gehe-zu~) möglich ist oder nicht.
+    #+begin_src racket
+      (define (aktion-auf-möglich? die-welt aktion kachel-x kachel-y)
+        (define feld-kachel
+          (spielfeld-kachel die-welt kachel-x kachel y))
+        (define element
+          (car (spielelemente-auf die-welt kachel-x kachel-y)))
+        (cond
+          [(eq? aktion 'gehe-zu)
+           (and (feld-blockiert-nicht? die-welt feld-kachel)
+              (element-blockiert-nicht? die-welt element))]
+          [else #f]))
+    #+end_src
+    Damit das beim Laufen auch berücksichtigt wird, müssen wir nun die
+    Tastatur-Behandlung anpassen (siehe ~tastatur-behandlung~).
+    #+begin_src racket
+      (define position (figur-end-position (welt-figur die-welt)))
+      (define kachel-x (car (posn->kachel-koordinaten position)))
+      (define kachel-y (cdr (posn->kachel-koordinaten position)))
+      ;...
+      [(and (taste-in? "left" 'abenteuer)
+          (aktion-möglich? die-welt 'gehe-zu (- kachel-x 1) kachel-y))
+       ; ...
+       ]
+      [(and (taste-in? "right" 'abenteuer)
+          (aktion-möglich? die-welt 'gehe-zu (+ kachel-x 1) kachel-y))
+       ; ...
+       ]
+      [(and (taste-in? "up" 'abenteuer)
+          (aktion-möglich? die-welt 'gehe-zu kachel-x (+ kachel-y 1)))
+       ; ...
+       ]
+      [(and (taste-in? "down" 'abenteuer)
+          (aktion-möglich? die-welt 'gehe-zu kachel-x (+ kachel-y 1)))
+       ; ...
+       ]
+      ;...
+    #+end_src
+    So, jetzt starte mal das Spiel und versuche mal überall herumzulaufen. Kannst du überall hin? Trifft das deine Erwartungen?
 * DrRacket - Das Spiel
 ** Big Bang
    Unser Spiel startet mit einem /big bang/.
