@@ -1561,10 +1561,10 @@
          (define das-spielfeld (welt-feld die-welt))
          (define die-spielelemente (welt-elemente die-welt))
          (place-images
-          (append (list (figur->bild die-figur frame))
-                  (spielelemente->bilder die-spielelemente frame))
-          (append (list (figur-zwischen-position die-figur frame))
-                  (spielelemente->posn die-spielelemente))
+          (append (list (figur->bild die-figur frame)
+                        (spielelemente->bilder die-spielelemente frame)))
+          (append (list (figur-zwischen-position die-figur frame)
+                        (spielelemente->posn die-spielelemente)))
           (spielfeld-szene das-spielfeld start-szene frame)))
      #+end_src
      Dir ist bestimmt aufgefallen, daß hier eine neue Funktion dazugekommen ist, ~figur-zwischen-position~, die die Zwischenposition der Figur
@@ -1608,9 +1608,9 @@
             neue-kachel-koordinate-y))
 
            (struct-copy figur die-figur
-                        [start-position figur-pos
-                         end-position   neue-position
-                         start-frame    frame]))
+                        [start-position figur-pos]
+                        [end-position   neue-position]
+                        [start-frame    frame]))
      #+end_src
      Du siehst der Aufruf hat sich nun um das Parameter ~frame~ erweitert, der den Anfang der Bewegung markiert. Dieses Parameter muß beim
      Aufruf in der Funktion ~tastatur-behandlung~ nun noch ergänzt werden.
