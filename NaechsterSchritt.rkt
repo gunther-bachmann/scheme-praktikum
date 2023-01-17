@@ -4,77 +4,24 @@
 (require lang/posn)
 (require 2htdp/universe)
 
-(define window (rectangle 15 15 "outline" "white"))
+(define SKALIERUNG 4)
 
-(define block
-  (above (beside/align "bottom"
-                       (triangle 40 "solid" "red")
-                       (triangle 30 "solid" "blue"))
-         (underlay/xy 
-          (rectangle 70 40 "solid" "black")
-          7 15
-          window)))
+(define SPIELFELD-BREITE 8)
+(define SPIELFELD-HÖHE 8)
 
-(define door (rectangle 15 25 "solid" "brown"))
+(define KACHEL-BREITE 16)
+(define KACHEL-HÖHE 16)
 
+(define INVENTORY-BREITE 4)
+(define INVENTORY-HÖHE 3)
 
+(define ANIMATIONS-FRAMES 6)
 
-; (overlay/align "center" "bottom" door block)
-(define door-with-knob
-  (overlay/align "right" "center" (circle 3 "solid" "white") door))
-; (overlay/align "center" "bottom" door-with-knob block)
-
-
-;(above/align "left" wand boden)
-
-(define eckwand (bitmap "./media/Sprite-eckwand-gruen.png"))
-
-;(beside/align "bottom" wand eckwand)
-        
-
-(define WAND-BILD (bitmap "./media/Sprite-wand-gruen.png"))
-(define ECK-WAND-BILD (bitmap "./media/Sprite-eckwand-gruen.png"))
-(define BODEN-BILD (bitmap "./media/Sprite-boden-blau.png"))
-(define HOLZBODEN-BILD (bitmap "./media/Sprite-holzboden.png"))
-(define MAUERWAND-BILD (bitmap "./media/Sprite-mauerwand.png"))
-(define FACKEL-ROT-BILD (bitmap "./media/Sprite-fackel-rot.png"))
-(define ECKWAND-ROT-BILD (bitmap "./media/Sprite-eckwand-rot.png"))
-(define FALLTUER-BILD (bitmap "./media/Sprite-falltuer.png"))
-(define SCHATZTRUHE-BILD (bitmap "./media/Sprite-schatztruhe.png"))
-(define ECKWAND-ROT-90-BILD (bitmap "./media/Sprite-eckwand-rot.90.png"))
-(define ECKWAND-ROT-180-BILD (bitmap "./media/Sprite-eckwand-rot.180.png"))
-(define ECKWAND-ROT-270-BILD (bitmap "./media/Sprite-eckwand-rot.270.png"))
-(define MAUERWAND-90-BILD (bitmap "./media/Sprite-mauerwand.90.png"))
-(define MAUERWAND-180-BILD (bitmap "./media/Sprite-mauerwand.180.png"))
-(define MAUERWAND-270-BILD (bitmap "./media/Sprite-mauerwand.270.png"))
-(define SCHATZTRUHE-90-BILD (bitmap "./media/Sprite-schatztruhe.90.png"))
-(define SCHATZTRUHE-270-BILD (bitmap "./media/Sprite-schatztruhe.270.png"))
-(define TUER-ROT-BILD (bitmap "./media/Sprite-tuer-rot.png"))
-(define TUER-ROT-2.0-BILD (bitmap "./media/Sprite-tuer-rot-2.0.png"))
-(define TUER-ROT-2.0-180-BILD (bitmap "./media/Sprite-tuer-rot-2.0.180.png"))
-(define NORMADE-2.-BILD (bitmap "./media/Sprite-normade 2.png"))
-(define HERZOG-2.-BILD (bitmap "./media/Sprite-herzog 2.png"))
-(define MAGIER-BILD (bitmap "./media/Sprite-magier.png"))
-(define TOPF-BILD (bitmap "./media/Sprite-food-topf.png"))
-(define PRIESTER-BILD (bitmap "./media/Sprite-sonnenprister.png"))
-; (define BUERGER-BILD (bitmap "./media/Sprite-reicher-Buerger.png"))
-
-
-(define BUERGER-1 (bitmap "./media/Sprite-reicher-Buerger1.png"))
-(define BUERGER-2 (bitmap "./media/Sprite-reicher-Buerger2.png"))
-
-(define MAGIER-1 (bitmap "./media/Sprite-magier1.png"))
-(define MAGIER-2 (bitmap "./media/Sprite-magier2.png"))
-(define MAGIER-3 (bitmap "./media/Sprite-magier3.png"))
-
-(define SONNENPRIESTER-1 (bitmap "./media/Sprite-sonnenprister1.png"))
-(define SONNENPRIESTER-2 (bitmap "./media/Sprite-sonnenprister2.png"))
-
-
-(define FACKEL-1 (bitmap "./media/Sprite-fackel-rot.animiert1.png"))
-(define FACKEL-2 (bitmap "./media/Sprite-fackel-rot.animiert2.png"))
-(define FACKEL-3 (bitmap "./media/Sprite-fackel-rot.animiert3.png"))
-(define FACKEL-4 (bitmap "./media/Sprite-fackel-rot.animiert4.png"))
+(struct welt (frame feld elemente figur zustand))
+(struct figur
+  (kachel start-position end-position start-frame inventory))
+(struct inventory (gegenstände))
+(struct gegenstand (kachel))
 
 (define spielfeld
   (list 'rote-eckwand.270 'mauer 'mauer 'fackel 'mauer 'tuer-rot-2.0 'mauer 'rote-eckwand
@@ -87,13 +34,60 @@
         'rote-eckwand.180 'mauer.180 'mauer.180 'mauer.180 'mauer.180 'mauer.180 'mauer.180 'rote-eckwand.90
         ))
 
-(define SKALIERUNG 8)
+(define spielelemente
+  (list 'buerger 4 5
+        'schatz.90 6 3
+        'schatz.270 1 1
+        ))
 
+(define WAND-BILD (bitmap "./media/Sprite-wand-gruen.png"))
+(define ECK-WAND-BILD (bitmap "./media/Sprite-eckwand-gruen.png"))
+(define BODEN-BILD (bitmap "./media/Sprite-boden-blau.png"))
+(define HOLZBODEN-BILD (bitmap "./media/Sprite-holzboden.png"))
+(define MAUERWAND-BILD (bitmap "./media/Sprite-mauerwand.png"))
+(define FACKEL-ROT-BILD (bitmap "./media/Sprite-fackel-rot.png"))
+(define ECKWAND-ROT-BILD (bitmap "./media/Sprite-eckwand-rot.png"))
+(define FALLTUER-BILD (bitmap "./media/Sprite-falltuer.png"))
+(define SCHATZTRUHE-BILD (bitmap "./media/Sprite-schatztruhe.png"))
+(define TUER-ROT-BILD (bitmap "./media/Sprite-tuer-rot.png"))
+(define TUER-ROT-2.0-BILD (bitmap "./media/Sprite-tuer-rot-2.0.png"))
+(define TUER-ROT-2.0-180-BILD (bitmap "./media/Sprite-tuer-rot-2.0.180.png"))
+(define NORMADE-2.-BILD (bitmap "./media/Sprite-normade 2.png"))
+(define HERZOG-2.-BILD (bitmap "./media/Sprite-herzog 2.png"))
+(define MAGIER-BILD (bitmap "./media/Sprite-magier.png"))
+(define TOPF-BILD (bitmap "./media/Sprite-food-topf.png"))
+(define PRIESTER-BILD (bitmap "./media/Sprite-sonnenprister.png"))
+(define TRANK-BLAU-BILD (bitmap "./media/Sprite-trank-blau.png"))
+(define BROT-BILD (bitmap "./media/Sprite-brot.png"))
+(define KAMPFSTAB-BILD (bitmap "./media/Sprite-kampfstab.png"))
+(define MUENZE-A-BILD (bitmap "./media/Sprite-muenz.a.png"))
+(define TRANK-ROT-BILD (bitmap "./media/Sprite-trank-rot.png"))
+(define INVENTORY-BLAU-BILD (bitmap "./media/Sprite-inventory-blau.png"))
+
+
+(define BUERGER-1 (bitmap "./media/Sprite-reicher-Buerger1.png"))
+(define BUERGER-2 (bitmap "./media/Sprite-reicher-Buerger2.png"))
+
+(define MAGIER-1 (bitmap "./media/Sprite-magier1.png"))
+(define MAGIER-2 (bitmap "./media/Sprite-magier2.png"))
+(define MAGIER-3 (bitmap "./media/Sprite-magier3.png"))
+
+(define SONNENPRIESTER-1 (bitmap "./media/Sprite-sonnenprister1.png"))
+(define SONNENPRIESTER-2 (bitmap "./media/Sprite-sonnenprister2.png"))
+
+(define FACKEL-1 (bitmap "./media/Sprite-fackel-rot.animiert1.png"))
+(define FACKEL-2 (bitmap "./media/Sprite-fackel-rot.animiert2.png"))
+(define FACKEL-3 (bitmap "./media/Sprite-fackel-rot.animiert3.png"))
+(define FACKEL-4 (bitmap "./media/Sprite-fackel-rot.animiert4.png"))
+
+;; ================ Animierte Kacheln
+
+; Bild (nicht skaliert) vom Buerger (für Animation)
 (define (buerger frame)
   (list-ref (list BUERGER-1 BUERGER-2)
             (modulo (quotient frame 40) 2)))
 
-
+;
 (define (magier frame)
   (list-ref (list MAGIER-1 MAGIER-2 MAGIER-3 MAGIER-2  MAGIER-1  MAGIER-1)
             (modulo (quotient frame 30) 6)))
@@ -106,8 +100,15 @@
   (list-ref (list FACKEL-1 FACKEL-2 FACKEL-3 FACKEL-4)
             (modulo (quotient frame 10) 4) ) )
 
+; Kachel in animiertes Bild umgewandelt (nicht skaliert)
 (define (kachel->bild kachel frame)
   (cond
+    [(eq? kachel 'inventory-blau) INVENTORY-BLAU-BILD]
+    [(eq? kachel 'trank-rot) TRANK-ROT-BILD]
+    [(eq? kachel 'muenze.a) MUENZE-A-BILD]
+    [(eq? kachel 'kampfstab) KAMPFSTAB-BILD]
+    [(eq? kachel 'brot) BROT-BILD]
+    [(eq? kachel 'trank-blau) TRANK-BLAU-BILD]
     [(eq? kachel 'buerger) (buerger frame)]
     [(eq? kachel 'sonnenpriester) (sonnenpriester frame)]
     [(eq? kachel 'topf) TOPF-BILD]
@@ -138,13 +139,39 @@
     [(eq? kachel 'boden) BODEN-BILD]
     [else BODEN-BILD]))
 
+;;================ INVENTORY
 
-(define SPIELFELD-BREITE 8)
-(define SPIELFELD-HÖHE 8)
+(define start-inventory
+  (inventory (list (gegenstand 'trank-rot)
+                   (gegenstand 'trank-blau))))
 
-(define KACHEL-BREITE 16)
-(define KACHEL-HÖHE 16)
+(define empty-inventory
+  (empty-scene (* SKALIERUNG INVENTORY-BREITE KACHEL-BREITE)
+               (* SKALIERUNG INVENTORY-HÖHE KACHEL-HÖHE)
+               "light gray")) 
 
+(define (gegenstände->bilder die-gegenstände)
+  (map (lambda (gegenstand)
+         (kachel->bild (gegenstand-kachel gegenstand) frame))
+       die-gegenstände))
+
+(define (draw-inventory das-inventory frame)
+  (place-images
+   (map (lambda (bild) (scale SKALIERUNG bild))
+        (append (gegenstände->bilder
+                 (inventory-gegenstände das-inventory))
+                (make-list (*  INVENTORY-BREITE INVENTORY-HÖHE) (kachel->bild 'inventory-blau 0))))
+   (append (take (kachel->posn INVENTORY-BREITE INVENTORY-HÖHE) (length (inventory-gegenstände das-inventory)))
+           (kachel->posn INVENTORY-BREITE INVENTORY-HÖHE))
+   empty-inventory))
+
+(define (inventory-posn)
+  (make-posn
+   (/ (* SKALIERUNG KACHEL-BREITE SPIELFELD-BREITE) 2)
+   (/ (* SKALIERUNG KACHEL-HÖHE SPIELFELD-HÖHE) 2)))
+;; ============ Umrechnungen Bildschirmposition und Kachelposition
+
+; Kachelposition in Bildschirmposition umrechnen
 (define (kachel-koordinaten->posn kachel-x kachel-y)
   (make-posn (* SKALIERUNG (+ (/ KACHEL-BREITE 2)
                               (* KACHEL-BREITE
@@ -153,28 +180,26 @@
                               (* KACHEL-HÖHE
                                  kachel-y)))))
 
-(define (kachel->posn)
+
+(define (kachel->posn breite höhe)
   (map (lambda (number)
-         (kachel-koordinaten->posn (modulo number SPIELFELD-BREITE )
-                                   (quotient number SPIELFELD-HÖHE )))
-       (range 0 (* SPIELFELD-BREITE SPIELFELD-HÖHE))))
+         (kachel-koordinaten->posn
+          (modulo number breite)
+          (quotient number breite)))
+       (range 0 (* breite höhe))))
 
-(define start-szene
-  (empty-scene (* SKALIERUNG SPIELFELD-BREITE KACHEL-BREITE)
-               (* SKALIERUNG SPIELFELD-HÖHE KACHEL-HÖHE)
-               "black"))
+; Bildschirmposition in Kachelposition umrechnen
+(define (posn->kachel-koordinaten a-posn)
+  (cons  (quotient
+          (- (quotient (posn-x a-posn) SKALIERUNG)
+             (/ KACHEL-BREITE 2))
+          KACHEL-BREITE)
+         (quotient
+          (- (quotient (posn-y a-posn) SKALIERUNG)
+             (/ KACHEL-HÖHE 2))
+          KACHEL-HÖHE)))
 
-
-(define (spielfeld-szene das-spielfeld die-szene frame)
-  (place-images (map (lambda (bild) (scale SKALIERUNG bild))
-                     (map (lambda (kachel) (kachel->bild kachel frame)) das-spielfeld))
-                (kachel->posn)
-                die-szene))
-
-(define spielelemente
-  (list 'buerger 4 5
-        'schatz.90 6 3
-        'schatz.270 1 1))
+;; ========= Positionierung Spielelemente
 
 (define (kachel-liste->sk-bild-liste kachel-liste frame)
   (map (lambda (bild) (scale SKALIERUNG bild))                  
@@ -189,42 +214,34 @@
 (define (spielelemente->bilder elemente frame)
   (kachel-liste->sk-bild-liste (filter (lambda (element) (symbol? element)) elemente) frame))
 
-
-(struct figur (kachel position))
-
-(define magier-figur (figur 'magier (make-posn 5 3)))
-(define herzog-figur (figur 'herzog (make-posn 3 2)))
-(define sonnenpriester-figur (figur 'sonnenpriester (kachel-koordinaten->posn 2 1)))
-
-
 (define (spielelemente->posn elemente)
   (map (lambda (koordinaten) (kachel-koordinaten->posn (car koordinaten) (cdr koordinaten)))
        (make-pairs (filter (lambda (element) (number? element)) elemente))))
 
 
-(struct welt (frame feld elemente figur))
+;; =======  Figur
+(define sonnenpriester-figur
+  (figur 'sonnenpriester
+         (kachel-koordinaten->posn 2 1)
+         (kachel-koordinaten->posn 2 1)
+         0
+         start-inventory))
 
-(define start-welt
-  (welt 0 spielfeld spielelemente sonnenpriester-figur))
+(define (figur-zwischen-position die-figur frame)
+  (if (>= frame
+          (+ (figur-start-frame die-figur) ANIMATIONS-FRAMES))
+      (figur-end-position die-figur)
+      (zwischen-position
+       (figur-start-position die-figur)
+       (figur-end-position die-figur)
+       (- frame (figur-start-frame die-figur)))))
 
 (define (figur->bild die-figur der-frame)
   (scale SKALIERUNG (kachel->bild (figur-kachel die-figur) der-frame)))
 
-
-; Bildschirmposition in Kachelposition umrechnen
-(define (posn->kachel-koordinaten a-posn)
-  (cons  (quotient
-          (- (quotient (posn-x a-posn) SKALIERUNG)
-             (/ KACHEL-BREITE 2))
-          KACHEL-BREITE)
-         (quotient
-          (- (quotient (posn-y a-posn) SKALIERUNG)
-             (/ KACHEL-HÖHE 2))
-          KACHEL-HÖHE)))
-
 ; bewege die figur um kachel-delta-x horizontal (nach rechts/links)
-(define (bewege-figur die-figur kachel-delta-x kachel-delta-y)
-  (define figur-pos (figur-position die-figur))
+(define (bewege-figur die-figur kachel-delta-x kachel-delta-y frame)
+  (define figur-pos (figur-end-position die-figur))
   (define kachel-koordinaten
     (posn->kachel-koordinaten figur-pos))
   
@@ -236,29 +253,72 @@
     (kachel-koordinaten->posn
      neue-kachel-koordinate-x
      neue-kachel-koordinate-y))
+  
+  (struct-copy figur die-figur
+               [start-position figur-pos]
+               [end-position neue-position]
+               [start-frame frame]))
 
-  (struct-copy figur die-figur  
-               [position neue-position]))
+;; ========= die welt
+
+(define start-welt
+  (welt 0 spielfeld spielelemente sonnenpriester-figur 'abenteuer))
 
 
 (define (tastatur-behandlung die-welt taste)
-  (cond [(key=? taste "left")
+  (cond [(and (eq? (welt-zustand die-welt) 'abenteuer) (key=? taste "left"))
          (struct-copy
           welt die-welt
-          [figur (bewege-figur (welt-figur die-welt) -1 0)])]
-        [(key=? taste "right")
+          [figur (bewege-figur (welt-figur die-welt) -1 0 (welt-frame die-welt))])]
+        [(and (eq? (welt-zustand die-welt) 'abenteuer) (key=? taste "right"))
          (struct-copy
           welt die-welt
-          [figur (bewege-figur (welt-figur die-welt) 1 0)])]
-         [(key=? taste "up")
+          [figur (bewege-figur (welt-figur die-welt) 1 0 (welt-frame die-welt))])]
+        [(and (eq? (welt-zustand die-welt) 'abenteuer) (key=? taste "up"))
          (struct-copy
           welt die-welt
-          [figur (bewege-figur (welt-figur die-welt) 0 -1)])]
-        [(key=? taste "down")
+          [figur (bewege-figur (welt-figur die-welt) 0 -1 (welt-frame die-welt))])]
+        [(and (eq? (welt-zustand die-welt) 'abenteuer) (key=? taste "down"))
          (struct-copy
           welt die-welt
-          [figur (bewege-figur (welt-figur die-welt) 0 1)])]
+          [figur (bewege-figur (welt-figur die-welt) 0 1 (welt-frame die-welt))])]
+        [(and (eq? (welt-zustand die-welt) 'abenteuer) (key=? taste "i"))
+         (struct-copy
+          welt die-welt
+          [zustand 'inventory])]
+        [(and (eq? (welt-zustand die-welt) 'inventory) (key=? taste "i"))
+         (struct-copy
+          welt die-welt
+          [zustand 'abenteuer])]
         [else die-welt]))
+
+(define (zwischen-position start-position
+                           end-position
+                           frame)
+  (define neue-x-position
+    (+ (posn-x start-position)
+       (/ (* frame
+             (- (posn-x end-position)
+                (posn-x start-position)))
+          ANIMATIONS-FRAMES)))
+  (define neue-y-position
+    (+ (posn-y start-position)
+       (/ (* frame
+             (- (posn-y end-position)
+                (posn-y start-position)))
+          ANIMATIONS-FRAMES)))
+  (make-posn neue-x-position neue-y-position))
+
+(define start-szene
+  (empty-scene (* SKALIERUNG SPIELFELD-BREITE KACHEL-BREITE)
+               (* SKALIERUNG SPIELFELD-HÖHE KACHEL-HÖHE)
+               "black"))
+
+(define (spielfeld-szene das-spielfeld die-szene frame)
+  (place-images (map (lambda (bild) (scale SKALIERUNG bild))
+                     (map (lambda (kachel) (kachel->bild kachel frame)) das-spielfeld))
+                (kachel->posn SPIELFELD-BREITE SPIELFELD-HÖHE)
+                die-szene))
 
 (define (draw die-welt)
   (define frame (welt-frame die-welt))
@@ -266,26 +326,18 @@
   (define das-spielfeld (welt-feld die-welt))
   (define die-spielelemente (welt-elemente die-welt))
   (place-images
-   (append (list (figur->bild die-figur frame))
-           (spielelemente->bilder die-spielelemente frame))
-   (append (list (figur-position die-figur))
-           (spielelemente->posn die-spielelemente))
+   (filter (lambda (el) (not (void? el))) (append (list (when (eq? (welt-zustand die-welt) 'inventory) (draw-inventory (figur-inventory die-figur) frame))
+                                                        (figur->bild die-figur frame))
+                                                  (spielelemente->bilder die-spielelemente frame)))
+   (filter (lambda (el) (not (void? el))) (append (list (when (eq? (welt-zustand die-welt) 'inventory) (inventory-posn))
+                                                        (figur-zwischen-position die-figur frame))
+                                                  (spielelemente->posn die-spielelemente)))
    (spielfeld-szene das-spielfeld start-szene frame)))
+
 
 (define (next-frame die-welt)
   (struct-copy welt die-welt
                [frame (+ 1 (welt-frame die-welt))]))
-
-
-;(define (next-frame die-welt)
-;(struct-copy welt die-welt
-;[frame (+ 1 (welt-frame die-welt))]))
-
-
-
-;(big-bang start-welt
-; (on-tick next-frame)
-;(to-draw draw))
 
 (big-bang start-welt
   (on-tick next-frame)
