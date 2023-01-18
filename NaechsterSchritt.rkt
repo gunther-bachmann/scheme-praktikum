@@ -34,11 +34,7 @@
         'rote-eckwand.180 'mauer.180 'mauer.180 'mauer.180 'mauer.180 'mauer.180 'mauer.180 'rote-eckwand.90
         ))
 
-(define spielelemente
-  (list 'buerger 4 5
-        'schatz.90 6 3
-        'schatz.270 1 1
-        ))
+(struct spielelement (kachel position))
 
 (define WAND-BILD (bitmap "./media/Sprite-wand-gruen.png"))
 (define ECK-WAND-BILD (bitmap "./media/Sprite-eckwand-gruen.png"))
@@ -63,6 +59,7 @@
 (define MUENZE-A-BILD (bitmap "./media/Sprite-muenz.a.png"))
 (define TRANK-ROT-BILD (bitmap "./media/Sprite-trank-rot.png"))
 (define INVENTORY-BLAU-BILD (bitmap "./media/Sprite-inventory-blau.png"))
+(define MUENZE-BILD (bitmap "./media/Sprite-muenze.png"))
 
 
 (define BUERGER-1 (bitmap "./media/Sprite-reicher-Buerger1.png"))
@@ -103,6 +100,7 @@
 ; Kachel in animiertes Bild umgewandelt (nicht skaliert)
 (define (kachel->bild kachel frame)
   (cond
+    [(eq? kachel 'muenze-blau) MUENZE-BILD]
     [(eq? kachel 'inventory-blau) INVENTORY-BLAU-BILD]
     [(eq? kachel 'trank-rot) TRANK-ROT-BILD]
     [(eq? kachel 'muenze.a) MUENZE-A-BILD]
@@ -137,12 +135,16 @@
     [(eq? kachel 'wand) WAND-BILD]
     [(eq? kachel 'eckwand) ECK-WAND-BILD]
     [(eq? kachel 'boden) BODEN-BILD]
-    [else BODEN-BILD]))
+    [else MUENZE-BILD]))
 
 ;;================ INVENTORY
 
 (define start-inventory
   (inventory (list (gegenstand 'trank-rot)
+                   (gegenstand 'topf)
+                   (gegenstand 'kampfstab)
+                   (gegenstand 'brot)
+                   (gegenstand 'muenze)
                    (gegenstand 'trank-blau))))
 
 (define empty-inventory
@@ -199,26 +201,59 @@
              (/ KACHEL-HÖHE 2))
           KACHEL-HÖHE)))
 
+(define (figur-position-anpassen position)
+  (make-posn (posn-x position) (- (posn-y position) (* SKALIERUNG (/ KACHEL-HÖHE 2)))))
+
+
+
 ;; ========= Positionierung Spielelemente
+
+(define spielelemente
+  (list (spielelement 'buerger (kachel-koordinaten->posn 4 5))
+        (spielelement 'schatz.90 (kachel-koordinaten->posn 6 3))
+        (spielelement 'schatz.270 (kachel-koordinaten->posn 1 1))
+        ))
+
 
 (define (kachel-liste->sk-bild-liste kachel-liste frame)
   (map (lambda (bild) (scale SKALIERUNG bild))                  
        (map (lambda (kachel) (kachel->bild kachel frame)) kachel-liste)))
 
-(define (-make-pairs lst res)
-  (if (null? lst) res
-      (-make-pairs (cddr lst)
-                   (append res (list (cons (first lst) (second lst)))))))
-(define (make-pairs lst) (-make-pairs lst (list)))
+;; =========
 
-(define (spielelemente->bilder elemente frame)
-  (kachel-liste->sk-bild-liste (filter (lambda (element) (symbol? element)) elemente) frame))
+(define (spielfeld-kachel die-welt kachel-x kachel-y)
+  (list-ref (welt-feld die-welt)
+            (+ kachel-x (* kachel-y SPIELFELD-BREITE))))
 
-(define (spielelemente->posn elemente)
-  (map (lambda (koordinaten) (kachel-koordinaten->posn (car koordinaten) (cdr koordinaten)))
-       (make-pairs (filter (lambda (element) (number? element)) elemente))))
+(define (spielelemente-auf die-welt kachel-x kachel-y)
+  (filter
+   (lambda (das-element)
+     (define pos (posn->kachel-koordinaten
+                  (spielelement-position das-element)))
+     (and (eq? (car pos) kachel-x)
+          (eq? (cdr pos) kachel-y)))
+   (welt-elemente die-welt)))
 
+(define (feld-blockiert-nicht? die-welt feld)
+  (memq feld (list 'boden 'holzboden)))
 
+(define (element-blockiert-nicht? die-welt element)
+  (memq element (list 'trank-rot 'muenze.a 'kampfstab 'brot 'trank-blau 'topf)))
+
+(define (elemente-blockieren-nicht? die-welt elemente)
+  (andmap identity (map (lambda (element) (element-blockiert-nicht? die-welt element)) elemente)))
+
+(define (aktion-auf-möglich? die-welt aktion kachel-x kachel-y)
+  (define feld-kachel
+    (spielfeld-kachel die-welt kachel-x kachel-y))
+  (define elemente
+    (map spielelement-kachel (spielelemente-auf die-welt kachel-x kachel-y)))
+  (cond
+    [(eq? aktion 'gehe-zu)
+     (and (feld-blockiert-nicht? die-welt feld-kachel)
+          (elemente-blockieren-nicht? die-welt elemente))]
+    [else #f]))
+  
 ;; =======  Figur
 (define sonnenpriester-figur
   (figur 'sonnenpriester
@@ -265,23 +300,29 @@
   (welt 0 spielfeld spielelemente sonnenpriester-figur 'abenteuer))
 
 
+(define (figur-auf-neue-position die-welt kachel-delta-x kachel-delta-y)
+  (struct-copy
+   welt die-welt
+   [figur (bewege-figur (welt-figur die-welt) kachel-delta-x kachel-delta-y (welt-frame die-welt))]))
+
 (define (tastatur-behandlung die-welt taste)
-  (cond [(and (eq? (welt-zustand die-welt) 'abenteuer) (key=? taste "left"))
-         (struct-copy
-          welt die-welt
-          [figur (bewege-figur (welt-figur die-welt) -1 0 (welt-frame die-welt))])]
-        [(and (eq? (welt-zustand die-welt) 'abenteuer) (key=? taste "right"))
-         (struct-copy
-          welt die-welt
-          [figur (bewege-figur (welt-figur die-welt) 1 0 (welt-frame die-welt))])]
-        [(and (eq? (welt-zustand die-welt) 'abenteuer) (key=? taste "up"))
-         (struct-copy
-          welt die-welt
-          [figur (bewege-figur (welt-figur die-welt) 0 -1 (welt-frame die-welt))])]
-        [(and (eq? (welt-zustand die-welt) 'abenteuer) (key=? taste "down"))
-         (struct-copy
-          welt die-welt
-          [figur (bewege-figur (welt-figur die-welt) 0 1 (welt-frame die-welt))])]
+  (define figur-kachel-pos (posn->kachel-koordinaten (figur-end-position (welt-figur die-welt))))
+  
+  (define (taste-in? taste-erwartet zustand)
+    (and (eq? (welt-zustand die-welt) zustand)
+         (key=? taste taste-erwartet)))
+
+  (define (aktion-möglich? aktion kachel-delta-x kachel-delta-y)
+    (aktion-auf-möglich? die-welt aktion (+ (car figur-kachel-pos) kachel-delta-x) (+ (cdr figur-kachel-pos) kachel-delta-y)))
+  
+  (cond [(and (taste-in?  "left" 'abenteuer) (aktion-möglich? 'gehe-zu -1 0))
+         (figur-auf-neue-position die-welt -1 0)]
+        [(and (taste-in? "right" 'abenteuer) (aktion-möglich? 'gehe-zu 1 0))
+         (figur-auf-neue-position die-welt 1 0)]
+        [(and (taste-in? "up" 'abenteuer) (aktion-möglich? 'gehe-zu 0 -1))
+         (figur-auf-neue-position die-welt 0 -1)]
+        [(and (taste-in? "down" 'abenteuer) (aktion-möglich? 'gehe-zu 0 1))
+         (figur-auf-neue-position die-welt 0 1)]
         [(and (eq? (welt-zustand die-welt) 'abenteuer) (key=? taste "i"))
          (struct-copy
           welt die-welt
@@ -326,12 +367,14 @@
   (define das-spielfeld (welt-feld die-welt))
   (define die-spielelemente (welt-elemente die-welt))
   (place-images
-   (filter (lambda (el) (not (void? el))) (append (list (when (eq? (welt-zustand die-welt) 'inventory) (draw-inventory (figur-inventory die-figur) frame))
-                                                        (figur->bild die-figur frame))
-                                                  (spielelemente->bilder die-spielelemente frame)))
-   (filter (lambda (el) (not (void? el))) (append (list (when (eq? (welt-zustand die-welt) 'inventory) (inventory-posn))
-                                                        (figur-zwischen-position die-figur frame))
-                                                  (spielelemente->posn die-spielelemente)))
+   (filter (lambda (el) (not (void? el)))
+           (append (list (when (eq? (welt-zustand die-welt) 'inventory) (draw-inventory (figur-inventory die-figur) frame))
+                         (figur->bild die-figur frame))
+                   (kachel-liste->sk-bild-liste (map spielelement-kachel die-spielelemente) frame)))
+   (filter (lambda (el) (not (void? el)))
+           (append (list (when (eq? (welt-zustand die-welt) 'inventory) (inventory-posn))
+                         (figur-position-anpassen (figur-zwischen-position die-figur frame)))
+                   (map spielelement-position die-spielelemente)))
    (spielfeld-szene das-spielfeld start-szene frame)))
 
 
