@@ -17,7 +17,7 @@
 
 (define ANIMATIONS-FRAMES 6)
 
-(struct welt (frame feld elemente figur zustand))
+(struct welt (frame feld elemente figur nicht-spieler-figuren zustand detail-level))
 (struct figur
   (kachel start-position end-position start-frame inventory))
 (struct inventory (gegenstände))
@@ -47,7 +47,6 @@
 (define SCHATZTRUHE-BILD (bitmap "./media/Sprite-schatztruhe.png"))
 (define TUER-ROT-BILD (bitmap "./media/Sprite-tuer-rot.png"))
 (define TUER-ROT-2.0-BILD (bitmap "./media/Sprite-tuer-rot-2.0.png"))
-(define TUER-ROT-2.0-180-BILD (bitmap "./media/Sprite-tuer-rot-2.0.180.png"))
 (define NORMADE-2.-BILD (bitmap "./media/Sprite-normade 2.png"))
 (define HERZOG-2.-BILD (bitmap "./media/Sprite-herzog 2.png"))
 (define MAGIER-BILD (bitmap "./media/Sprite-magier.png"))
@@ -113,7 +112,7 @@
     [(eq? kachel 'magier) (magier frame)]
     [(eq? kachel 'herzog-2) HERZOG-2.-BILD]
     [(eq? kachel 'normade-2) NORMADE-2.-BILD]
-    [(eq? kachel 'tuer-rot-2.0.180) TUER-ROT-2.0-180-BILD]
+    [(eq? kachel 'tuer-rot-2.0.180) (rotate 180 TUER-ROT-2.0-BILD)]
     [(eq? kachel 'tuer-rot-2.0)  TUER-ROT-2.0-BILD]
     [(eq? kachel 'tuer-rot) TUER-ROT-BILD]
     [(eq? kachel 'fackel) (fackel frame)]
@@ -157,20 +156,25 @@
          (kachel->bild (gegenstand-kachel gegenstand) frame))
        die-gegenstände))
 
+(define inventory-hintergrund-kacheln
+  (make-list (*  INVENTORY-BREITE INVENTORY-HÖHE) (kachel->bild 'inventory-blau 0)))
+
 (define (draw-inventory das-inventory frame)
+  (define kachel-positionen (kachel->posn INVENTORY-BREITE INVENTORY-HÖHE))
   (place-images
    (map (lambda (bild) (scale SKALIERUNG bild))
         (append (gegenstände->bilder
                  (inventory-gegenstände das-inventory))
-                (make-list (*  INVENTORY-BREITE INVENTORY-HÖHE) (kachel->bild 'inventory-blau 0))))
-   (append (take (kachel->posn INVENTORY-BREITE INVENTORY-HÖHE) (length (inventory-gegenstände das-inventory)))
-           (kachel->posn INVENTORY-BREITE INVENTORY-HÖHE))
+                inventory-hintergrund-kacheln))
+   (append (take kachel-positionen (length (inventory-gegenstände das-inventory)))
+           kachel-positionen)
    empty-inventory))
 
 (define (inventory-posn)
   (make-posn
    (/ (* SKALIERUNG KACHEL-BREITE SPIELFELD-BREITE) 2)
    (/ (* SKALIERUNG KACHEL-HÖHE SPIELFELD-HÖHE) 2)))
+
 ;; ============ Umrechnungen Bildschirmposition und Kachelposition
 
 ; Kachelposition in Bildschirmposition umrechnen
@@ -181,7 +185,6 @@
              (* SKALIERUNG (+ (/ KACHEL-HÖHE 2)
                               (* KACHEL-HÖHE
                                  kachel-y)))))
-
 
 (define (kachel->posn breite höhe)
   (map (lambda (number)
@@ -209,10 +212,13 @@
 ;; ========= Positionierung Spielelemente
 
 (define spielelemente
-  (list (spielelement 'buerger (kachel-koordinaten->posn 4 5))
-        (spielelement 'schatz.90 (kachel-koordinaten->posn 6 3))
+  (list (spielelement 'schatz.90 (kachel-koordinaten->posn 6 3))
         (spielelement 'schatz.270 (kachel-koordinaten->posn 1 1))
         ))
+
+(define nicht-spieler-figuren
+  (list (figur 'buerger (kachel-koordinaten->posn 4 5) (kachel-koordinaten->posn 4 5) 0 (list))))
+        
 
 
 (define (kachel-liste->sk-bild-liste kachel-liste frame)
@@ -243,15 +249,25 @@
 (define (elemente-blockieren-nicht? die-welt elemente)
   (andmap identity (map (lambda (element) (element-blockiert-nicht? die-welt element)) elemente)))
 
+(define (spieler-auf die-welt kachel-x kachel-y)
+  (findf (lambda (nsp-figur)
+           (define pos (posn->kachel-koordinaten (figur-end-position nsp-figur)))
+           (and (eq? (car pos) kachel-x)
+                (eq? (cdr pos) kachel-y)))
+         (cons (welt-figur die-welt) (welt-nicht-spieler-figuren die-welt))))
+
 (define (aktion-auf-möglich? die-welt aktion kachel-x kachel-y)
   (define feld-kachel
     (spielfeld-kachel die-welt kachel-x kachel-y))
   (define elemente
     (map spielelement-kachel (spielelemente-auf die-welt kachel-x kachel-y)))
+  (define nsp-spieler
+    (spieler-auf die-welt kachel-x kachel-y))
   (cond
     [(eq? aktion 'gehe-zu)
      (and (feld-blockiert-nicht? die-welt feld-kachel)
-          (elemente-blockieren-nicht? die-welt elemente))]
+          (elemente-blockieren-nicht? die-welt elemente)
+          (not nsp-spieler))]
     [else #f]))
   
 ;; =======  Figur
@@ -275,7 +291,7 @@
   (scale SKALIERUNG (kachel->bild (figur-kachel die-figur) der-frame)))
 
 ; bewege die figur um kachel-delta-x horizontal (nach rechts/links)
-(define (bewege-figur die-figur kachel-delta-x kachel-delta-y frame)
+(define (bewege-figur die-figur kachel-delta-x kachel-delta-y frame detail-level)
   (define figur-pos (figur-end-position die-figur))
   (define kachel-koordinaten
     (posn->kachel-koordinaten figur-pos))
@@ -290,20 +306,20 @@
      neue-kachel-koordinate-y))
   
   (struct-copy figur die-figur
-               [start-position figur-pos]
+               [start-position (if (< 4 detail-level) figur-pos neue-position)]
                [end-position neue-position]
                [start-frame frame]))
 
 ;; ========= die welt
 
 (define start-welt
-  (welt 0 spielfeld spielelemente sonnenpriester-figur 'abenteuer))
+  (welt 0 spielfeld spielelemente sonnenpriester-figur nicht-spieler-figuren 'abenteuer 0))
 
 
 (define (figur-auf-neue-position die-welt kachel-delta-x kachel-delta-y)
   (struct-copy
    welt die-welt
-   [figur (bewege-figur (welt-figur die-welt) kachel-delta-x kachel-delta-y (welt-frame die-welt))]))
+   [figur (bewege-figur (welt-figur die-welt) kachel-delta-x kachel-delta-y (welt-frame die-welt) (welt-detail-level die-welt))]))
 
 (define (tastatur-behandlung die-welt taste)
   (define figur-kachel-pos (posn->kachel-koordinaten (figur-end-position (welt-figur die-welt))))
@@ -331,6 +347,14 @@
          (struct-copy
           welt die-welt
           [zustand 'abenteuer])]
+        [(taste-in? "+" 'abenteuer)
+         (struct-copy
+          welt die-welt
+          [detail-level (+ 1 (welt-detail-level die-welt))])]
+        [(taste-in? "-" 'abenteuer)
+         (struct-copy
+          welt die-welt
+          [detail-level (- (welt-detail-level die-welt) 1)])]
         [else die-welt]))
 
 (define (zwischen-position start-position
@@ -361,26 +385,76 @@
                 (kachel->posn SPIELFELD-BREITE SPIELFELD-HÖHE)
                 die-szene))
 
+(define (remove-void liste)
+  (filter (lambda (el) (not (void? el))) liste))
+
+(define (detail-level>? die-welt level)
+  (< level (welt-detail-level die-welt)))
+
+(define (current-welt-frame die-welt)
+  (if (< 0 (welt-detail-level die-welt)) (welt-frame die-welt) 0))
+
+(define (draw-nicht-spieler-figuren die-welt)
+  (map (lambda (nsp-figur)
+         (figur->bild nsp-figur (current-welt-frame die-welt)))
+       (welt-nicht-spieler-figuren die-welt)))
+
+(define (nicht-spieler-figuren-posn die-welt)
+  (map (lambda (nsp-figur)
+         (figur-position-anpassen (figur-zwischen-position nsp-figur (current-welt-frame die-welt))))
+       (welt-nicht-spieler-figuren die-welt)))
+
 (define (draw die-welt)
-  (define frame (welt-frame die-welt))
+  (define frame (current-welt-frame die-welt))
   (define die-figur (welt-figur die-welt))
   (define das-spielfeld (welt-feld die-welt))
   (define die-spielelemente (welt-elemente die-welt))
+  (define nsp-figuren (welt-nicht-spieler-figuren die-welt))
   (place-images
-   (filter (lambda (el) (not (void? el)))
-           (append (list (when (eq? (welt-zustand die-welt) 'inventory) (draw-inventory (figur-inventory die-figur) frame))
-                         (figur->bild die-figur frame))
-                   (kachel-liste->sk-bild-liste (map spielelement-kachel die-spielelemente) frame)))
-   (filter (lambda (el) (not (void? el)))
-           (append (list (when (eq? (welt-zustand die-welt) 'inventory) (inventory-posn))
-                         (figur-position-anpassen (figur-zwischen-position die-figur frame)))
-                   (map spielelement-position die-spielelemente)))
+   (remove-void
+    (append (list (when (eq? (welt-zustand die-welt) 'inventory) (draw-inventory (figur-inventory die-figur) frame))
+                  (when (detail-level>? die-welt 3) (figur->bild die-figur frame)))
+            (if (detail-level>? die-welt 2)
+                (draw-nicht-spieler-figuren die-welt)
+                (list))
+            (if (detail-level>? die-welt 1)
+                (kachel-liste->sk-bild-liste (map spielelement-kachel die-spielelemente) frame)
+                (list))))
+   (remove-void
+    (append (list (when (eq? (welt-zustand die-welt) 'inventory) (inventory-posn))
+                  (when (detail-level>? die-welt 3) (figur-position-anpassen (figur-zwischen-position die-figur frame))))
+            (if (detail-level>? die-welt 2)
+                (nicht-spieler-figuren-posn die-welt)
+                (list))
+            (if (detail-level>? die-welt 1)
+                (map spielelement-position die-spielelemente)
+                (list))))
    (spielfeld-szene das-spielfeld start-szene frame)))
 
+(define (figur-zufällig-bewegt die-welt die-figur frame)
+  (define dx (random -1 2))
+  (define dy (random -1 2))
+  (define figur-kachel-pos (posn->kachel-koordinaten (figur-end-position die-figur)))
+  (if (and (detail-level>? die-welt 5)
+           (> (random 1000) 980)
+           (> frame 30)
+           (eq? 'abenteuer (welt-zustand die-welt))
+           (aktion-auf-möglich? die-welt 'gehe-zu (+ dx (car figur-kachel-pos)) (+ dy (cdr figur-kachel-pos))))
+      (bewege-figur die-figur dx dy frame (welt-detail-level die-welt))
+      die-figur
+      ))    
+
+(define (zufällige-bewegung die-welt nsp-figuren frame)
+  (map (lambda (figur) (figur-zufällig-bewegt die-welt figur frame)) 
+       nsp-figuren))
 
 (define (next-frame die-welt)
   (struct-copy welt die-welt
-               [frame (+ 1 (welt-frame die-welt))]))
+               [frame (+ 1 (welt-frame die-welt))]
+               [nicht-spieler-figuren
+                (zufällige-bewegung die-welt
+                                    (welt-nicht-spieler-figuren die-welt)
+                                    (welt-frame die-welt))]))
 
 (big-bang start-welt
   (on-tick next-frame)
