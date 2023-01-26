@@ -10,3 +10,4 @@
 *.tex
 *.pdf
 ltximg/
+compiled/
