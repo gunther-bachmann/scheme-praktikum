@@ -4,7 +4,7 @@
 (require lang/posn)
 (require 2htdp/universe)
 
-(define SKALIERUNG 4)
+(define SKALIERUNG 6)
 
 (define SPIELFELD-BREITE 8)
 (define SPIELFELD-HÖHE 8)
@@ -214,6 +214,7 @@
 (define spielelemente
   (list (spielelement 'schatz.90 (kachel-koordinaten->posn 6 3))
         (spielelement 'schatz.270 (kachel-koordinaten->posn 1 1))
+        (spielelement 'trank-blau (kachel-koordinaten->posn 3 4))
         ))
 
 (define nicht-spieler-figuren
