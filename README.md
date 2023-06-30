@@ -1,6 +1,15 @@
 # scheme-praktikum
 scheme based introduction to game programming for highschool two week of programming practice
 
+## Start the game
+
+- open 'NaechsteSchritte.rkt' and execute (in emacs or DrRacket) ...
+- ... or `racket NachsteSchritte.rkt` on the shell
+- keys:
+  - `+` increase `-` decrease level of detail
+  - up, down, left, right to move figure
+  - `i` to show inventory
+
 ## references
 - game programming inspired by https://github.com/ericclack/racket-examples.git
 - racket teach packs https://docs.racket-lang.org/htdp/
